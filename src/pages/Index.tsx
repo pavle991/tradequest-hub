@@ -10,22 +10,22 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Revolutionize Your B2B Procurement
+              Revolucija u B2B Nabavci
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Connect with trusted suppliers, streamline negotiations, and manage transactions
-              all in one secure platform.
+              Povežite se sa pouzdanim dobavljačima, pojednostavite pregovore i upravljajte
+              transakcijama na jednoj sigurnoj platformi.
             </p>
             <div className="flex justify-center space-x-4">
               <Link to="/register">
                 <Button size="lg" className="text-lg">
-                  Get Started
+                  Započnite Odmah
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline" className="text-lg">
-                  Learn More
+                  Saznajte Više
                 </Button>
               </Link>
             </div>
@@ -37,23 +37,23 @@ const Index = () => {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Why Choose Our Platform?
+            Zašto Izabrati Našu Platformu?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
               icon={<Shield className="h-12 w-12 text-primary" />}
-              title="Secure Transactions"
-              description="Protected identity during negotiations and secure payment processing with escrow service."
+              title="Sigurne Transakcije"
+              description="Zaštićen identitet tokom pregovora i sigurno procesiranje plaćanja sa escrow servisom."
             />
             <FeatureCard
               icon={<MessageSquare className="h-12 w-12 text-primary" />}
-              title="Smart Communication"
-              description="AI-powered categorization and built-in messaging system for efficient negotiations."
+              title="Pametna Komunikacija"
+              description="AI kategorizacija i ugrađen sistem za poruke za efikasne pregovore."
             />
             <FeatureCard
               icon={<Star className="h-12 w-12 text-primary" />}
-              title="Trust & Reputation"
-              description="Comprehensive rating system and verified business profiles for confident dealings."
+              title="Poverenje i Reputacija"
+              description="Sveobuhvatan sistem ocenjivanja i verifikovani profili firmi za pouzdano poslovanje."
             />
           </div>
         </div>
@@ -63,11 +63,11 @@ const Index = () => {
       <section className="bg-primary py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-6">
-            Ready to Transform Your Business?
+            Spremni da Transformišete Vaše Poslovanje?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of businesses already using our platform to streamline their
-            procurement process.
+            Pridružite se hiljadama firmi koje već koriste našu platformu za unapređenje
+            procesa nabavke.
           </p>
           <Link to="/register">
             <Button
@@ -75,7 +75,7 @@ const Index = () => {
               variant="secondary"
               className="text-lg bg-white text-primary hover:bg-gray-100"
             >
-              Start Free Trial
+              Započnite Besplatnu Probu
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>

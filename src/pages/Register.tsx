@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   companyName: z.string().min(2, "Naziv firme mora imati najmanje 2 karaktera"),
@@ -26,6 +28,8 @@ const formSchema = z.object({
 });
 
 const Register = () => {
+  const navigate = useNavigate();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,6 +44,9 @@ const Register = () => {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     console.log(values);
+    // Ovde će kasnije biti integracija sa backend-om
+    toast.success("Uspešno ste se registrovali!");
+    navigate("/dashboard");
   };
 
   return (
