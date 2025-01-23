@@ -10,6 +10,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const mockData = [
   { mesec: "Jan", upiti: 4 },
@@ -19,29 +20,39 @@ const mockData = [
   { mesec: "Maj", upiti: 7 },
 ]
 
-const mockInquiries = [
-  {
-    id: 1,
-    title: "Potrebni kancelarijski materijali",
-    description: "Tražimo ponudu za kopir papir A4, 80g, 500 listova - 100 kutija",
-    status: "aktivan",
-    date: "2024-01-23",
-  },
-  {
-    id: 2,
-    title: "Računarska oprema",
-    description: "Potrebno 10 laptopova za firmu",
-    status: "aktivan",
-    date: "2024-01-22",
-  },
-]
+type Inquiry = {
+  id: number
+  title: string
+  description: string
+  status: string
+  date: string
+  type: "buying" | "selling"
+}
 
 const Dashboard = () => {
+  const [inquiries, setInquiries] = useState<Inquiry[]>([
+    {
+      id: 1,
+      title: "Potrebni kancelarijski materijali",
+      description: "Tražimo ponudu za kopir papir A4, 80g, 500 listova - 100 kutija",
+      status: "aktivan",
+      date: "2024-01-23",
+      type: "buying"
+    },
+    {
+      id: 2,
+      title: "Prodaja računarske opreme",
+      description: "Na prodaju 5 polovnih laptopova u odličnom stanju",
+      status: "aktivan",
+      date: "2024-01-22",
+      type: "selling"
+    }
+  ])
   const [newInquiryTitle, setNewInquiryTitle] = useState("")
   const [newInquiryDescription, setNewInquiryDescription] = useState("")
   const { toast } = useToast()
 
-  const handleSubmitInquiry = (e: React.FormEvent) => {
+  const handleSubmitInquiry = (type: "buying" | "selling") => (e: React.FormEvent) => {
     e.preventDefault()
     if (!newInquiryTitle || !newInquiryDescription) {
       toast({
@@ -52,87 +63,183 @@ const Dashboard = () => {
       return
     }
     
+    const newInquiry: Inquiry = {
+      id: Date.now(),
+      title: newInquiryTitle,
+      description: newInquiryDescription,
+      status: "aktivan",
+      date: new Date().toISOString().split('T')[0],
+      type
+    }
+    
+    setInquiries(prev => [newInquiry, ...prev])
+    
     toast({
       title: "Uspešno",
-      description: "Vaš upit je uspešno poslat",
+      description: type === "buying" ? "Vaš upit za kupovinu je uspešno poslat" : "Vaš prodajni oglas je uspešno objavljen",
     })
     
     setNewInquiryTitle("")
     setNewInquiryDescription("")
   }
 
+  const buyingInquiries = inquiries.filter(i => i.type === "buying")
+  const sellingInquiries = inquiries.filter(i => i.type === "selling")
+
   return (
     <div className="container mx-auto py-6 space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Statistika */}
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Statistika Upita</h2>
-          <ChartContainer className="h-[300px]" config={{}}>
-            <BarChart data={mockData}>
-              <XAxis dataKey="mesec" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="upiti" fill="#3b82f6" />
-            </BarChart>
-          </ChartContainer>
-        </Card>
-
-        {/* Novi upit */}
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Novi Upit</h2>
-          <form onSubmit={handleSubmitInquiry} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Naslov</label>
-              <Input
-                value={newInquiryTitle}
-                onChange={(e) => setNewInquiryTitle(e.target.value)}
-                placeholder="Unesite naslov upita"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Opis</label>
-              <Textarea
-                value={newInquiryDescription}
-                onChange={(e) => setNewInquiryDescription(e.target.value)}
-                placeholder="Detaljno opišite šta vam je potrebno"
-                rows={4}
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Pošalji Upit
-            </Button>
-          </form>
-        </Card>
-      </div>
-
-      {/* Lista aktivnih upita */}
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Aktivni Upiti</h2>
-        <div className="space-y-4">
-          {mockInquiries.map((inquiry) => (
-            <Card key={inquiry.id} className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold">{inquiry.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
-                  <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
-                </div>
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  {inquiry.status}
-                </span>
-              </div>
-              <div className="mt-4 flex gap-2">
-                <Button variant="outline" size="sm">
-                  Pregledaj ponude
-                </Button>
-                <Button variant="outline" size="sm">
-                  Zatvori upit
-                </Button>
-              </div>
+      <Tabs defaultValue="buying" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="buying">Kupovina</TabsTrigger>
+          <TabsTrigger value="selling">Prodaja</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="buying" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Statistika */}
+            <Card className="p-6">
+              <h2 className="text-2xl font-bold mb-4">Statistika Upita za Kupovinu</h2>
+              <ChartContainer className="h-[300px]" config={{}}>
+                <BarChart data={mockData}>
+                  <XAxis dataKey="mesec" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="upiti" fill="#3b82f6" />
+                </BarChart>
+              </ChartContainer>
             </Card>
-          ))}
-        </div>
-      </Card>
+
+            {/* Novi upit za kupovinu */}
+            <Card className="p-6">
+              <h2 className="text-2xl font-bold mb-4">Novi Upit za Kupovinu</h2>
+              <form onSubmit={handleSubmitInquiry("buying")} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Naslov</label>
+                  <Input
+                    value={newInquiryTitle}
+                    onChange={(e) => setNewInquiryTitle(e.target.value)}
+                    placeholder="Unesite naslov upita"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Opis</label>
+                  <Textarea
+                    value={newInquiryDescription}
+                    onChange={(e) => setNewInquiryDescription(e.target.value)}
+                    placeholder="Detaljno opišite šta vam je potrebno"
+                    rows={4}
+                  />
+                </div>
+                <Button type="submit" className="w-full">
+                  Pošalji Upit za Kupovinu
+                </Button>
+              </form>
+            </Card>
+          </div>
+
+          {/* Lista aktivnih upita za kupovinu */}
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Aktivni Upiti za Kupovinu</h2>
+            <div className="space-y-4">
+              {buyingInquiries.map((inquiry) => (
+                <Card key={inquiry.id} className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold">{inquiry.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
+                      <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                      {inquiry.status}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm">
+                      Pregledaj ponude
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Zatvori upit
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="selling" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Statistika prodaje */}
+            <Card className="p-6">
+              <h2 className="text-2xl font-bold mb-4">Statistika Prodajnih Oglasa</h2>
+              <ChartContainer className="h-[300px]" config={{}}>
+                <BarChart data={mockData}>
+                  <XAxis dataKey="mesec" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="upiti" fill="#3b82f6" />
+                </BarChart>
+              </ChartContainer>
+            </Card>
+
+            {/* Novi prodajni oglas */}
+            <Card className="p-6">
+              <h2 className="text-2xl font-bold mb-4">Novi Prodajni Oglas</h2>
+              <form onSubmit={handleSubmitInquiry("selling")} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Naslov</label>
+                  <Input
+                    value={newInquiryTitle}
+                    onChange={(e) => setNewInquiryTitle(e.target.value)}
+                    placeholder="Unesite naslov oglasa"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Opis</label>
+                  <Textarea
+                    value={newInquiryDescription}
+                    onChange={(e) => setNewInquiryDescription(e.target.value)}
+                    placeholder="Detaljno opišite šta prodajete"
+                    rows={4}
+                  />
+                </div>
+                <Button type="submit" className="w-full">
+                  Objavi Prodajni Oglas
+                </Button>
+              </form>
+            </Card>
+          </div>
+
+          {/* Lista aktivnih prodajnih oglasa */}
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Aktivni Prodajni Oglasi</h2>
+            <div className="space-y-4">
+              {sellingInquiries.map((inquiry) => (
+                <Card key={inquiry.id} className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold">{inquiry.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
+                      <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                      {inquiry.status}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm">
+                      Pregledaj upite
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Zatvori oglas
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
