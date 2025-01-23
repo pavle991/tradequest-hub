@@ -1,4 +1,5 @@
 import { Building2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Footer = () => {
   return (
@@ -8,76 +9,76 @@ export const Footer = () => {
           <div className="col-span-1">
             <div className="flex items-center space-x-2">
               <Building2 className="h-8 w-8 text-primary" />
-              <span className="font-bold text-xl text-gray-900">B2B Platform</span>
+              <span className="font-bold text-xl text-gray-900">B2B Platforma</span>
             </div>
             <p className="mt-4 text-gray-600">
-              Connecting businesses through efficient procurement solutions.
+              Povezujemo firme kroz efikasna rešenja za nabavku.
             </p>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Platform</h3>
+            <h3 className="font-semibold text-gray-900">Platforma</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  How it works
-                </a>
+                <Link to="/how-it-works" className="text-gray-600 hover:text-primary">
+                  Kako funkcioniše
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  Pricing
-                </a>
+                <Link to="/pricing" className="text-gray-600 hover:text-primary">
+                  Cenovnik
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  FAQ
-                </a>
+                <Link to="/faq" className="text-gray-600 hover:text-primary">
+                  Česta pitanja
+                </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Company</h3>
+            <h3 className="font-semibold text-gray-900">Kompanija</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  About us
-                </a>
+                <Link to="/about" className="text-gray-600 hover:text-primary">
+                  O nama
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  Contact
-                </a>
+                <Link to="/contact" className="text-gray-600 hover:text-primary">
+                  Kontakt
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  Privacy Policy
-                </a>
+                <Link to="/privacy" className="text-gray-600 hover:text-primary">
+                  Privatnost
+                </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Support</h3>
+            <h3 className="font-semibold text-gray-900">Podrška</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  Help Center
-                </a>
+                <Link to="/help" className="text-gray-600 hover:text-primary">
+                  Pomoć
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  Terms of Service
-                </a>
+                <Link to="/terms" className="text-gray-600 hover:text-primary">
+                  Uslovi korišćenja
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  Legal
-                </a>
+                <Link to="/legal" className="text-gray-600 hover:text-primary">
+                  Pravne informacije
+                </Link>
               </li>
             </ul>
           </div>
         </div>
         <div className="mt-8 border-t pt-8">
           <p className="text-gray-400 text-center">
-            © {new Date().getFullYear()} B2B Platform. All rights reserved.
+            © {new Date().getFullYear()} B2B Platforma. Sva prava zadržana.
           </p>
         </div>
       </div>

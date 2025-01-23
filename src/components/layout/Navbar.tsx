@@ -10,20 +10,20 @@ export const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Building2 className="h-8 w-8 text-primary" />
-              <span className="font-bold text-xl text-gray-900">B2B Platform</span>
+              <span className="font-bold text-xl text-gray-900">B2B Platforma</span>
             </Link>
           </div>
           <div className="flex items-center space-x-4">
             <Link to="/login">
               <Button variant="ghost" className="flex items-center space-x-2">
                 <LogIn className="h-5 w-5" />
-                <span>Login</span>
+                <span>Prijava</span>
               </Button>
             </Link>
             <Link to="/register">
               <Button className="flex items-center space-x-2">
                 <UserPlus className="h-5 w-5" />
-                <span>Register</span>
+                <span>Registracija</span>
               </Button>
             </Link>
           </div>

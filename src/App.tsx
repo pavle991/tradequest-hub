@@ -6,6 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import About from "./pages/About";
+import HowItWorks from "./pages/HowItWorks";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +24,10 @@ const App = () => (
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
             </Routes>
           </main>
           <Footer />
