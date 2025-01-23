@@ -1,24 +1,13 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis } from "recharts"
-import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-const mockData = [
-  { mesec: "Jan", upiti: 4 },
-  { mesec: "Feb", upiti: 6 },
-  { mesec: "Mar", upiti: 8 },
-  { mesec: "Apr", upiti: 5 },
-  { mesec: "Maj", upiti: 7 },
-]
+import { InquiryChat } from "@/components/dashboard/InquiryChat"
+import { InvoiceGenerator } from "@/components/dashboard/InvoiceGenerator"
+import { Analytics } from "@/components/dashboard/Analytics"
 
 type Inquiry = {
   id: number
@@ -83,8 +72,26 @@ const Dashboard = () => {
     setNewInquiryDescription("")
   }
 
+  const handleCloseInquiry = (inquiryId: number) => {
+    setInquiries(prev =>
+      prev.map(inquiry =>
+        inquiry.id === inquiryId
+          ? { ...inquiry, status: "zatvoren" }
+          : inquiry
+      )
+    )
+  }
+
   const buyingInquiries = inquiries.filter(i => i.type === "buying")
   const sellingInquiries = inquiries.filter(i => i.type === "selling")
+
+  const analyticsData = {
+    totalInquiries: inquiries.length,
+    activeInquiries: inquiries.filter(i => i.status === "aktivan").length,
+    completedInquiries: inquiries.filter(i => i.status === "zatvoren").length,
+    averageResponseTime: "2h 15min",
+    successRate: 85,
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-8">
@@ -95,49 +102,32 @@ const Dashboard = () => {
         </TabsList>
         
         <TabsContent value="buying" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Statistika */}
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Statistika Upita za Kupovinu</h2>
-              <ChartContainer className="h-[300px]" config={{}}>
-                <BarChart data={mockData}>
-                  <XAxis dataKey="mesec" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="upiti" fill="#3b82f6" />
-                </BarChart>
-              </ChartContainer>
-            </Card>
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Novi Upit za Kupovinu</h2>
+            <form onSubmit={handleSubmitInquiry("buying")} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Naslov</label>
+                <Input
+                  value={newInquiryTitle}
+                  onChange={(e) => setNewInquiryTitle(e.target.value)}
+                  placeholder="Unesite naslov upita"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Opis</label>
+                <Textarea
+                  value={newInquiryDescription}
+                  onChange={(e) => setNewInquiryDescription(e.target.value)}
+                  placeholder="Detaljno opišite šta vam je potrebno"
+                  rows={4}
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Pošalji Upit za Kupovinu
+              </Button>
+            </form>
+          </Card>
 
-            {/* Novi upit za kupovinu */}
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Novi Upit za Kupovinu</h2>
-              <form onSubmit={handleSubmitInquiry("buying")} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Naslov</label>
-                  <Input
-                    value={newInquiryTitle}
-                    onChange={(e) => setNewInquiryTitle(e.target.value)}
-                    placeholder="Unesite naslov upita"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Opis</label>
-                  <Textarea
-                    value={newInquiryDescription}
-                    onChange={(e) => setNewInquiryDescription(e.target.value)}
-                    placeholder="Detaljno opišite šta vam je potrebno"
-                    rows={4}
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Pošalji Upit za Kupovinu
-                </Button>
-              </form>
-            </Card>
-          </div>
-
-          {/* Lista aktivnih upita za kupovinu */}
           <Card className="p-6">
             <h2 className="text-2xl font-bold mb-4">Aktivni Upiti za Kupovinu</h2>
             <div className="space-y-4">
@@ -154,12 +144,16 @@ const Dashboard = () => {
                     </span>
                   </div>
                   <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm">
-                      Pregledaj ponude
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Zatvori upit
-                    </Button>
+                    <InquiryChat
+                      inquiryId={inquiry.id}
+                      inquiryTitle={inquiry.title}
+                      onClose={() => {}}
+                    />
+                    <InvoiceGenerator
+                      inquiryId={inquiry.id}
+                      inquiryTitle={inquiry.title}
+                      onClose={() => handleCloseInquiry(inquiry.id)}
+                    />
                   </div>
                 </Card>
               ))}
@@ -168,49 +162,32 @@ const Dashboard = () => {
         </TabsContent>
 
         <TabsContent value="selling" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Statistika prodaje */}
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Statistika Prodajnih Oglasa</h2>
-              <ChartContainer className="h-[300px]" config={{}}>
-                <BarChart data={mockData}>
-                  <XAxis dataKey="mesec" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="upiti" fill="#3b82f6" />
-                </BarChart>
-              </ChartContainer>
-            </Card>
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Novi Prodajni Oglas</h2>
+            <form onSubmit={handleSubmitInquiry("selling")} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Naslov</label>
+                <Input
+                  value={newInquiryTitle}
+                  onChange={(e) => setNewInquiryTitle(e.target.value)}
+                  placeholder="Unesite naslov oglasa"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Opis</label>
+                <Textarea
+                  value={newInquiryDescription}
+                  onChange={(e) => setNewInquiryDescription(e.target.value)}
+                  placeholder="Detaljno opišite šta prodajete"
+                  rows={4}
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Objavi Prodajni Oglas
+              </Button>
+            </form>
+          </Card>
 
-            {/* Novi prodajni oglas */}
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-4">Novi Prodajni Oglas</h2>
-              <form onSubmit={handleSubmitInquiry("selling")} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Naslov</label>
-                  <Input
-                    value={newInquiryTitle}
-                    onChange={(e) => setNewInquiryTitle(e.target.value)}
-                    placeholder="Unesite naslov oglasa"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Opis</label>
-                  <Textarea
-                    value={newInquiryDescription}
-                    onChange={(e) => setNewInquiryDescription(e.target.value)}
-                    placeholder="Detaljno opišite šta prodajete"
-                    rows={4}
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Objavi Prodajni Oglas
-                </Button>
-              </form>
-            </Card>
-          </div>
-
-          {/* Lista aktivnih prodajnih oglasa */}
           <Card className="p-6">
             <h2 className="text-2xl font-bold mb-4">Aktivni Prodajni Oglasi</h2>
             <div className="space-y-4">
@@ -227,12 +204,16 @@ const Dashboard = () => {
                     </span>
                   </div>
                   <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm">
-                      Pregledaj upite
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Zatvori oglas
-                    </Button>
+                    <InquiryChat
+                      inquiryId={inquiry.id}
+                      inquiryTitle={inquiry.title}
+                      onClose={() => {}}
+                    />
+                    <InvoiceGenerator
+                      inquiryId={inquiry.id}
+                      inquiryTitle={inquiry.title}
+                      onClose={() => handleCloseInquiry(inquiry.id)}
+                    />
                   </div>
                 </Card>
               ))}
@@ -240,6 +221,8 @@ const Dashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Analytics {...analyticsData} />
     </div>
   )
 }
