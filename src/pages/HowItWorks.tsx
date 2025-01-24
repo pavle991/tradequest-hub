@@ -1,13 +1,13 @@
 import { 
   UserPlus, 
-  LayoutDashboard, 
-  PlusCircle, 
-  Search, 
   MessageSquare, 
   CheckCircle2, 
   CreditCard, 
   Star,
-  ShieldCheck
+  Search,
+  ShoppingBag,
+  Truck,
+  ThumbsUp
 } from "lucide-react";
 
 const HowItWorks = () => {
@@ -18,98 +18,76 @@ const HowItWorks = () => {
           Kako platforma funkcioniše
         </h1>
 
-        <div className="grid gap-12">
+        <div className="grid gap-8">
           <RoadmapSection
             icon={<UserPlus className="w-8 h-8 text-blue-600" />}
-            title="1. Registracija na platformu"
+            title="1. Registracija"
             items={[
-              'Posetite početnu stranicu i kliknite na "Registruj se"',
-              "Unesite osnovne podatke o svojoj firmi (naziv, email, PIB, ako želite i broj telefona)",
-              "Odaberite kategorije robe ili usluga kojima se bavite",
-              "Nakon potvrde registracije, dobićete pristup svim funkcionalnostima"
+              "Firma otvara jedinstveni nalog, unosom osnovnih podataka i kategorija delatnosti."
             ]}
           />
 
           <RoadmapSection
-            icon={<LayoutDashboard className="w-8 h-8 text-blue-600" />}
-            title="2. Prijava i Dashboard"
+            icon={<ShoppingBag className="w-8 h-8 text-blue-600" />}
+            title="2. Kreiranje upita"
             items={[
-              "Prijavite se na svoj nalog korišćenjem email-a i lozinke",
-              "Na glavnoj stranici (Dashboard) prikazuju se vaše trenutne aktivnosti",
-              "Moji upiti (zahtevi koje ste postavili)",
-              "Upiti iz mojih kategorija (ponude drugih firmi za robu/usluge iz oblasti koje vas zanimaju)",
-              "Poruke i notifikacije (razgovori sa drugim firmama, upozorenja o novim ponudama)"
-            ]}
-          />
-
-          <RoadmapSection
-            icon={<PlusCircle className="w-8 h-8 text-blue-600" />}
-            title="3. Slanje (kreiranje) novog upita"
-            items={[
-              'Kliknite na "Novi upit" ili "Dodaj zahtev"',
-              "Upišite u slobodno polje šta vam je tačno potrebno",
-              "Platforma koristi AI kategorizaciju kako bi izdvojila ključne reči",
-              "Automatski se kreira upit vidljiv svim relevantnim firmama"
+              "Kupac opisuje potrebnu robu ili uslugu, dok AI automatski prepoznaje ključne reči i dodeljuje ih odgovarajućoj kategoriji."
             ]}
           />
 
           <RoadmapSection
             icon={<Search className="w-8 h-8 text-blue-600" />}
-            title="4. Pregled tuđih upita i slanje ponuda"
+            title="3. Pregled upita"
             items={[
-              "Platforma prikazuje listu aktuelnih zahteva koji odgovaraju vašim ponudama",
-              "Kliknite na upit koji vas zanima za detalje i mogućnost odgovora",
-              "Dostavljanje ponude kroz Chat/Tiket sistem"
+              "Svaka firma može videti i odabrati samo one zahteve koji se poklapaju s njenim asortimanom."
             ]}
           />
 
           <RoadmapSection
             icon={<MessageSquare className="w-8 h-8 text-blue-600" />}
-            title="5. Chat i pregovori"
+            title="4. Chat i pregovori"
             items={[
-              "Sistem poruka za razmenu dodatnih informacija",
-              "Identitet firmi je skriven do finalnog dogovora",
-              "Čuvanje svih poruka za kasniju proveru"
+              "Komunikacija se odvija kroz integrisani tiket sistem, uz skriven identitet do finalizacije dogovora."
             ]}
           />
 
           <RoadmapSection
             icon={<CheckCircle2 className="w-8 h-8 text-blue-600" />}
-            title="6. Prihvatanje ponude i e-Faktura"
+            title="5. Slanje ponude"
             items={[
-              "Prihvatanje ponude kreira e-Fakturu",
-              "Faktura sadrži podatke obe strane",
-              "Obračunava se 1% provizije"
+              "Firma koja nudi robu popunjava detalje (količina, rok isporuke, cena) i šalje ih kupcu na razmatranje."
             ]}
           />
 
           <RoadmapSection
             icon={<CreditCard className="w-8 h-8 text-blue-600" />}
+            title="6. Prihvatanje ponude i fakturisanje"
+            items={[
+              'Klikom na "Prihvati ponudu" generiše se e-faktura sa obračunatom 1% provizijom za platformu.'
+            ]}
+          />
+
+          <RoadmapSection
+            icon={<Truck className="w-8 h-8 text-blue-600" />}
             title="7. Plaćanje i isporuka"
             items={[
-              "Kupac dobija podatke za uplatu",
-              "Nakon evidentirane uplate, roba se šalje",
-              "Mogućnost praćenja pošiljke kroz sistem"
+              "Kupac vrši uplatu, a prodavac šalje robu, uz mogućnost praćenja pošiljke preko kurirske službe."
+            ]}
+          />
+
+          <RoadmapSection
+            icon={<ThumbsUp className="w-8 h-8 text-blue-600" />}
+            title="8. Potvrda transakcije"
+            items={[
+              "Kupac potvrđuje prijem robe, što označava završetak trgovine i aktivira isplatu dobavljaču."
             ]}
           />
 
           <RoadmapSection
             icon={<Star className="w-8 h-8 text-blue-600" />}
-            title="8. Ocene i komentari"
+            title="9. Ocene i reputacija"
             items={[
-              "Međusobno ocenjivanje nakon uspešne transakcije",
-              "Ocenjivanje od 1-5 zvezdica",
-              "Mogućnost ostavljanja komentara"
-            ]}
-          />
-
-          <RoadmapSection
-            icon={<ShieldCheck className="w-8 h-8 text-blue-600" />}
-            title="9. Administratorski panel"
-            items={[
-              "Praćenje korisnika i upravljanje nalozima",
-              "Finansijski pregledi i obračuni",
-              "Moderacija sadržaja i komentara"
+              "Obe strane ocenjuju i komentarišu saradnju, čime se gradi poverenje i rangiranje korisnika."
             ]}
           />
         </div>
