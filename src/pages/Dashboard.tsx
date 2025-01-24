@@ -66,7 +66,7 @@ const Dashboard = () => {
     <div className="container mx-auto py-6 space-y-8">
       <Tabs defaultValue="buying" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="buying">Kupovina</TabsTrigger>
+          <TabsTrigger value="buying">Nabavka</TabsTrigger>
           <TabsTrigger value="selling">Prodaja</TabsTrigger>
         </TabsList>
         
