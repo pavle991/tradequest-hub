@@ -2,8 +2,12 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building2, LogIn, UserPlus } from "lucide-react";
 import { CompanyProfileButton } from "./CompanyProfileButton";
+import { useState } from "react"; // This is temporary until we implement proper auth
 
 export const Navbar = () => {
+  // This is temporary until we implement proper auth
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,19 +19,24 @@ export const Navbar = () => {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <CompanyProfileButton />
-            <Link to="/login">
-              <Button variant="ghost" className="flex items-center space-x-2">
-                <LogIn className="h-5 w-5" />
-                <span>Prijava</span>
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button className="flex items-center space-x-2">
-                <UserPlus className="h-5 w-5" />
-                <span>Registracija</span>
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <CompanyProfileButton />
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" className="flex items-center space-x-2">
+                    <LogIn className="h-5 w-5" />
+                    <span>Prijava</span>
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="flex items-center space-x-2">
+                    <UserPlus className="h-5 w-5" />
+                    <span>Registracija</span>
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

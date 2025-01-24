@@ -72,6 +72,15 @@ const Dashboard = () => {
     setNewInquiryDescription("")
   }
 
+  // Mock data for Analytics
+  const analyticsData = {
+    totalInquiries: inquiries.length,
+    activeInquiries: inquiries.filter(i => i.status === "aktivan").length,
+    completedInquiries: inquiries.filter(i => i.status === "završen").length,
+    averageResponseTime: "24h",
+    successRate: "85%"
+  }
+
   return (
     <div className="container mx-auto py-6 space-y-8">
       <Tabs defaultValue="buying" className="w-full">
@@ -200,7 +209,7 @@ const Dashboard = () => {
         </TabsContent>
       </Tabs>
 
-      <Analytics />
+      <Analytics {...analyticsData} />
     </div>
   )
 }
