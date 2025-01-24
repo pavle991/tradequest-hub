@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building2, LogIn, UserPlus } from "lucide-react";
+import { CompanyProfileButton } from "./CompanyProfileButton";
 
 export const Navbar = () => {
   return (
@@ -14,6 +15,7 @@ export const Navbar = () => {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
+            <CompanyProfileButton />
             <Link to="/login">
               <Button variant="ghost" className="flex items-center space-x-2">
                 <LogIn className="h-5 w-5" />

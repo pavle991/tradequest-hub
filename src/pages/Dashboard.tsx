@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InquiryChat } from "@/components/dashboard/InquiryChat"
 import { InvoiceGenerator } from "@/components/dashboard/InvoiceGenerator"
-import { CompanyProfile } from "@/components/dashboard/CompanyProfile"
 import { Analytics } from "@/components/dashboard/Analytics"
 
 type Inquiry = {
@@ -73,31 +72,8 @@ const Dashboard = () => {
     setNewInquiryDescription("")
   }
 
-  const handleCloseInquiry = (inquiryId: number) => {
-    setInquiries(prev =>
-      prev.map(inquiry =>
-        inquiry.id === inquiryId
-          ? { ...inquiry, status: "zatvoren" }
-          : inquiry
-      )
-    )
-  }
-
-  const buyingInquiries = inquiries.filter(i => i.type === "buying")
-  const sellingInquiries = inquiries.filter(i => i.type === "selling")
-
-  const analyticsData = {
-    totalInquiries: inquiries.length,
-    activeInquiries: inquiries.filter(i => i.status === "aktivan").length,
-    completedInquiries: inquiries.filter(i => i.status === "zatvoren").length,
-    averageResponseTime: "2h 15min",
-    successRate: 85,
-  }
-
   return (
     <div className="container mx-auto py-6 space-y-8">
-      <CompanyProfile />
-      
       <Tabs defaultValue="buying" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="buying">Kupovina</TabsTrigger>
@@ -134,27 +110,29 @@ const Dashboard = () => {
           <Card className="p-6">
             <h2 className="text-2xl font-bold mb-4">Aktivni Upiti za Kupovinu</h2>
             <div className="space-y-4">
-              {buyingInquiries.map((inquiry) => (
-                <Card key={inquiry.id} className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold">{inquiry.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
-                      <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
+              {inquiries
+                .filter(inquiry => inquiry.type === "buying")
+                .map((inquiry) => (
+                  <Card key={inquiry.id} className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold">{inquiry.title}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
+                        <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
+                      </div>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                        {inquiry.status}
+                      </span>
                     </div>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                      {inquiry.status}
-                    </span>
-                  </div>
-                  <div className="mt-4">
-                    <InquiryChat
-                      inquiryId={inquiry.id}
-                      inquiryTitle={inquiry.title}
-                      onClose={() => {}}
-                    />
-                  </div>
-                </Card>
-              ))}
+                    <div className="mt-4">
+                      <InquiryChat
+                        inquiryId={inquiry.id}
+                        inquiryTitle={inquiry.title}
+                        onClose={() => {}}
+                      />
+                    </div>
+                  </Card>
+                ))}
             </div>
           </Card>
         </TabsContent>
@@ -189,38 +167,40 @@ const Dashboard = () => {
           <Card className="p-6">
             <h2 className="text-2xl font-bold mb-4">Aktivni Prodajni Oglasi</h2>
             <div className="space-y-4">
-              {sellingInquiries.map((inquiry) => (
-                <Card key={inquiry.id} className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold">{inquiry.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
-                      <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
+              {inquiries
+                .filter(inquiry => inquiry.type === "selling")
+                .map((inquiry) => (
+                  <Card key={inquiry.id} className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold">{inquiry.title}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
+                        <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
+                      </div>
+                      <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                        {inquiry.status}
+                      </span>
                     </div>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                      {inquiry.status}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <InquiryChat
-                      inquiryId={inquiry.id}
-                      inquiryTitle={inquiry.title}
-                      onClose={() => {}}
-                    />
-                    <InvoiceGenerator
-                      inquiryId={inquiry.id}
-                      inquiryTitle={inquiry.title}
-                      onClose={() => handleCloseInquiry(inquiry.id)}
-                    />
-                  </div>
-                </Card>
-              ))}
+                    <div className="mt-4 flex gap-2">
+                      <InquiryChat
+                        inquiryId={inquiry.id}
+                        inquiryTitle={inquiry.title}
+                        onClose={() => {}}
+                      />
+                      <InvoiceGenerator
+                        inquiryId={inquiry.id}
+                        inquiryTitle={inquiry.title}
+                        onClose={() => {}}
+                      />
+                    </div>
+                  </Card>
+                ))}
             </div>
           </Card>
         </TabsContent>
       </Tabs>
 
-      <Analytics {...analyticsData} />
+      <Analytics />
     </div>
   )
 }
