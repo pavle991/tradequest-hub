@@ -78,7 +78,7 @@ const Dashboard = () => {
     activeInquiries: inquiries.filter(i => i.status === "aktivan").length,
     completedInquiries: inquiries.filter(i => i.status === "završen").length,
     averageResponseTime: "24h",
-    successRate: "85%"
+    successRate: 85
   }
 
   return (
