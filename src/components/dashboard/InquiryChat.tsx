@@ -4,12 +4,14 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
+import { Star } from "lucide-react"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog"
 
 type Message = {
@@ -29,18 +31,23 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      sender: "Prodavac",
-      content: "Pozdrav, kako vam mogu pomoći oko upita?",
+      sender: "Kupac",
+      content: "Potrebno mi je 100 kutija A4 papira, 80g/m2. Da li možete da mi dostavite ponudu sa cenom po kutiji i rokovima isporuke?",
       timestamp: "10:00"
     },
     {
       id: 2,
-      sender: "Kupac",
-      content: "Zdravo, interesuju me detaljnije specifikacije",
+      sender: "Prodavac",
+      content: "Poštovani, cena po kutiji je 1200 dinara sa PDV-om. Isporuka je moguća u roku od 2 radna dana na teritoriji Beograda. Minimalna količina za besplatnu dostavu je 50 kutija.",
       timestamp: "10:05"
     }
   ])
   const [newMessage, setNewMessage] = useState("")
+
+  // Simulirani podaci o prodavcu
+  const sellerRating = 4.5
+  const totalSales = 1250000
+  const numberOfRatings = 28
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return
@@ -56,6 +63,28 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
     setNewMessage("")
   }
 
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${
+              star <= rating
+                ? "text-yellow-400 fill-yellow-400"
+                : star - rating <= 0.5
+                ? "text-yellow-400 fill-yellow-400 opacity-50"
+                : "text-gray-300"
+            }`}
+          />
+        ))}
+        <span className="text-sm text-gray-600 ml-2">
+          ({numberOfRatings} ocena)
+        </span>
+      </div>
+    )
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -66,6 +95,17 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{inquiryTitle}</DialogTitle>
+          <DialogDescription>
+            <div className="flex flex-col gap-1 mt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Ocena prodavca:</span>
+                {renderStars(sellerRating)}
+              </div>
+              <div className="text-sm text-gray-600">
+                Ukupna vrednost prodaje: {totalSales.toLocaleString('sr-RS')} RSD
+              </div>
+            </div>
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col h-[500px]">
           <ScrollArea className="flex-grow p-4">
