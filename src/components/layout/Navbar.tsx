@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Building2, LogIn, UserPlus, Settings, BarChart3, LogOut } from "lucide-react";
+import { LogIn, UserPlus, Settings, BarChart3, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,17 +8,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react"; // This is temporary until we implement proper auth
+import { useState } from "react";
 
 export const Navbar = () => {
-  // This is temporary until we implement proper auth
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
   };
 
-  // Temporary toggle for demo purposes
   const handleLoginToggle = () => {
     setIsLoggedIn(!isLoggedIn);
   };
@@ -29,7 +27,11 @@ export const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary" />
+              <img 
+                src="/lovable-uploads/c766ab6e-bbb3-40c9-9e46-92cde5f2a1b5.png" 
+                alt="Amazon Logo" 
+                className="h-8 w-auto"
+              />
               <span className="font-bold text-xl text-gray-900">B2B Platforma</span>
             </Link>
           </div>
@@ -81,7 +83,6 @@ export const Navbar = () => {
                 </Link>
               </>
             )}
-            {/* Temporary button for demo purposes */}
             <Button variant="outline" size="sm" onClick={handleLoginToggle}>
               Toggle Login (Demo)
             </Button>
