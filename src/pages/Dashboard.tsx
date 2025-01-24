@@ -26,8 +26,8 @@ const Dashboard = () => {
     },
     {
       id: 2,
-      title: "Prodaja računarske opreme",
-      description: "Na prodaju 5 polovnih laptopova u odličnom stanju",
+      title: "Potrebna računarska oprema",
+      description: "Tražimo ponude za nabavku 5 laptopova za poslovnu upotrebu. Minimalne specifikacije: i5 procesor, 16GB RAM, 512GB SSD",
       status: "aktivan",
       date: "2024-01-22",
       type: "selling"

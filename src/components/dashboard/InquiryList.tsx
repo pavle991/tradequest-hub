@@ -1,6 +1,13 @@
 import { Card } from "@/components/ui/card"
 import { InquiryChat } from "./InquiryChat"
 import { InvoiceGenerator } from "./InvoiceGenerator"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { Button } from "@/components/ui/button"
+import { ChevronDown } from "lucide-react"
 
 type Inquiry = {
   id: number
@@ -97,30 +104,40 @@ export const InquiryList = ({ inquiries, type }: InquiryListProps) => {
           <div className="space-y-4">
             {agreedDeals.map((deal) => (
               <Card key={deal.id} className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold">{deal.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">Dogovoreno sa: {deal.seller}</p>
-                  </div>
-                </div>
-                <div className="mt-4 bg-gray-50 rounded-lg p-4 space-y-3">
-                  {deal.messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.sender === "Kupac" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[80%] bg-white rounded-lg p-3 shadow-sm ${message.sender === "Kupac" ? "bg-blue-50" : ""}`}>
-                        <p className="text-sm font-semibold">{message.sender}</p>
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs text-gray-500">{message.timestamp}</p>
-                      </div>
+                <Collapsible>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold">{deal.title}</h3>
+                      <p className="text-sm text-gray-600">Dogovoreno sa: {deal.seller}</p>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <InvoiceGenerator
-                    inquiryId={deal.id}
-                    inquiryTitle={deal.title}
-                    onClose={() => {}}
-                  />
-                </div>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                  
+                  <CollapsibleContent>
+                    <div className="mt-4 bg-gray-50 rounded-lg p-4 space-y-3">
+                      {deal.messages.map((message) => (
+                        <div key={message.id} className={`flex ${message.sender === "Kupac" ? "justify-end" : "justify-start"}`}>
+                          <div className={`max-w-[80%] bg-white rounded-lg p-3 shadow-sm ${message.sender === "Kupac" ? "bg-blue-50" : ""}`}>
+                            <p className="text-sm font-semibold">{message.sender}</p>
+                            <p className="text-sm">{message.content}</p>
+                            <p className="text-xs text-gray-500">{message.timestamp}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex justify-end">
+                      <InvoiceGenerator
+                        inquiryId={deal.id}
+                        inquiryTitle={deal.title}
+                        onClose={() => {}}
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </Card>
             ))}
           </div>
