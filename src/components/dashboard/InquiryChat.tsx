@@ -2,9 +2,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar } from "@/components/ui/avatar"
-import { Card } from "@/components/ui/card"
-import { Star, MessageCircle } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -13,6 +10,8 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { ChatMessage } from "./ChatMessage"
+import { SellerRating } from "./SellerRating"
 
 type Message = {
   id: number
@@ -87,29 +86,6 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
     setNewMessage("")
   }
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`w-4 h-4 ${
-              star <= rating
-                ? "text-yellow-400 fill-yellow-400"
-                : star - rating <= 0.5
-                ? "text-yellow-400 fill-yellow-400 opacity-50"
-                : "text-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-    )
-  }
-
-  const handleSelectSeller = (sellerId: number) => {
-    setSelectedSeller(sellerId)
-  }
-
   const filteredMessages = selectedSeller 
     ? messages.filter(m => !m.sellerId || m.sellerId === selectedSeller)
     : messages
@@ -129,20 +105,11 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
               {messages
                 .find(m => m.sellerId === selectedSeller)
                 ?.sender && (
-                <div className="flex flex-col gap-1 mt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Ocena prodavca:</span>
-                    {renderStars(messages.find(m => m.sellerId === selectedSeller)?.sellerRating || 0)}
-                    <span className="text-sm text-gray-600 ml-2">
-                      ({messages.find(m => m.sellerId === selectedSeller)?.numberOfRatings} ocena)
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Ukupna vrednost prodaje: {messages
-                      .find(m => m.sellerId === selectedSeller)
-                      ?.totalSales?.toLocaleString('sr-RS')} RSD
-                  </div>
-                </div>
+                <SellerRating
+                  rating={messages.find(m => m.sellerId === selectedSeller)?.sellerRating || 0}
+                  numberOfRatings={messages.find(m => m.sellerId === selectedSeller)?.numberOfRatings || 0}
+                  totalSales={messages.find(m => m.sellerId === selectedSeller)?.totalSales || 0}
+                />
               )}
             </DialogDescription>
           )}
@@ -151,46 +118,12 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
           <ScrollArea className="flex-grow p-4">
             <div className="space-y-4">
               {filteredMessages.map((message) => (
-                <div
+                <ChatMessage
                   key={message.id}
-                  className={`flex gap-2 ${
-                    message.sender === "Kupac" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`flex gap-2 max-w-[80%] ${
-                      message.sender === "Kupac" ? "flex-row-reverse" : "flex-row"
-                    }`}
-                  >
-                    <Avatar />
-                    <Card className="p-3">
-                      <div className="flex flex-col gap-1">
-                        <p className="text-sm font-semibold">{message.sender}</p>
-                        {message.sellerRating && (
-                          <div className="flex items-center gap-2">
-                            {renderStars(message.sellerRating)}
-                            <span className="text-xs text-gray-600">
-                              ({message.numberOfRatings})
-                            </span>
-                          </div>
-                        )}
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs text-gray-500">{message.timestamp}</p>
-                        {message.sellerId && !selectedSeller && (
-                          <Button 
-                            variant="secondary" 
-                            size="sm"
-                            className="mt-2"
-                            onClick={() => handleSelectSeller(message.sellerId!)}
-                          >
-                            <MessageCircle className="mr-2" />
-                            Nastavi razgovor
-                          </Button>
-                        )}
-                      </div>
-                    </Card>
-                  </div>
-                </div>
+                  message={message}
+                  selectedSeller={selectedSeller}
+                  onSelectSeller={setSelectedSeller}
+                />
               ))}
             </div>
           </ScrollArea>
