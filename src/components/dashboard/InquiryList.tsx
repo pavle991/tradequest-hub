@@ -1,24 +1,6 @@
-import { Card } from "@/components/ui/card"
-import { InquiryChat } from "./InquiryChat"
-import { InvoiceGenerator } from "./InvoiceGenerator"
-import { Button } from "@/components/ui/button"
-import { MessageCircle } from "lucide-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-
-type Inquiry = {
-  id: number
-  title: string
-  description: string
-  status: string
-  date: string
-  type: "buying" | "selling"
-}
+import { ActiveInquiries } from "./ActiveInquiries"
+import { SuccessfulDeals } from "./SuccessfulDeals"
+import { type Inquiry, type Deal } from "./types"
 
 type InquiryListProps = {
   inquiries: Inquiry[]
@@ -26,9 +8,7 @@ type InquiryListProps = {
 }
 
 export const InquiryList = ({ inquiries, type }: InquiryListProps) => {
-  const filteredInquiries = inquiries.filter(inquiry => inquiry.type === type)
-  
-  const agreedDeals = [
+  const agreedDeals: Deal[] = [
     {
       id: 1,
       seller: "Prodavac 2",
@@ -129,94 +109,8 @@ export const InquiryList = ({ inquiries, type }: InquiryListProps) => {
   
   return (
     <div className="space-y-6">
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">
-          {type === "buying" ? "Aktivni Upiti za Kupovinu" : "Aktivni upiti za robu"}
-        </h2>
-        <div className="space-y-4">
-          {filteredInquiries.map((inquiry) => (
-            <Card key={inquiry.id} className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold">{inquiry.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
-                  <p className="text-sm text-gray-500 mt-2">Datum: {inquiry.date}</p>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-sm ${
-                  type === "buying" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
-                }`}>
-                  {inquiry.status}
-                </span>
-              </div>
-              <div className="mt-4 flex gap-2">
-                <InquiryChat
-                  inquiryId={inquiry.id}
-                  inquiryTitle={inquiry.title}
-                  onClose={() => {}}
-                />
-                {type === "selling" && (
-                  <InvoiceGenerator
-                    inquiryId={inquiry.id}
-                    inquiryTitle={inquiry.title}
-                    onClose={() => {}}
-                  />
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Card>
-
-      {type === "selling" && agreedDeals.length > 0 && (
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Istorija Uspešnih Prodaja</h2>
-          <div className="space-y-4">
-            {agreedDeals.map((deal) => (
-              <Card key={deal.id} className="p-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <div className="flex justify-between items-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg">
-                      <div>
-                        <h3 className="font-semibold">{deal.title}</h3>
-                        <div className="flex flex-col gap-1">
-                          <p className="text-sm text-gray-600">Dogovoreno sa: {deal.seller}</p>
-                          <p className="text-sm text-gray-500">Datum: {deal.date}</p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>{deal.title}</DialogTitle>
-                    </DialogHeader>
-                    <div className="mt-4 bg-gray-50 rounded-lg p-4 space-y-3">
-                      {deal.messages.map((message) => (
-                        <div key={message.id} className={`flex ${message.sender === "Kupac" ? "justify-end" : "justify-start"}`}>
-                          <div className={`max-w-[80%] bg-white rounded-lg p-3 shadow-sm ${message.sender === "Kupac" ? "bg-blue-50" : ""}`}>
-                            <p className="text-sm font-semibold">{message.sender}</p>
-                            <p className="text-sm">{message.content}</p>
-                            <p className="text-xs text-gray-500">{message.timestamp}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                      <InvoiceGenerator
-                        inquiryId={deal.id}
-                        inquiryTitle={deal.title}
-                        onClose={() => {}}
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </Card>
-            ))}
-          </div>
-        </Card>
-      )}
+      <ActiveInquiries inquiries={inquiries} type={type} />
+      {type === "selling" && <SuccessfulDeals deals={agreedDeals} />}
     </div>
   )
 }
