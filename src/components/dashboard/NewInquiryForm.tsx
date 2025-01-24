@@ -34,7 +34,7 @@ export const NewInquiryForm = ({ onSubmit, type }: NewInquiryFormProps) => {
   return (
     <Card className="p-6">
       <h2 className="text-2xl font-bold mb-4">
-        {type === "buying" ? "Novi Upit za Kupovinu" : "Novi Prodajni Oglas"}
+        {type === "buying" ? "Novi Upit za Nabavku" : "Novi Prodajni Oglas"}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -55,7 +55,7 @@ export const NewInquiryForm = ({ onSubmit, type }: NewInquiryFormProps) => {
           />
         </div>
         <Button type="submit" className="w-full">
-          {type === "buying" ? "Pošalji Upit za Kupovinu" : "Objavi Prodajni Oglas"}
+          {type === "buying" ? "Pošalji Upit za Nabavku" : "Objavi Prodajni Oglas"}
         </Button>
       </form>
     </Card>

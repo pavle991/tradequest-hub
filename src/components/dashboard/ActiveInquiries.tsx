@@ -14,7 +14,7 @@ export const ActiveInquiries = ({ inquiries, type }: ActiveInquiriesProps) => {
   return (
     <Card className="p-6">
       <h2 className="text-2xl font-bold mb-4">
-        {type === "buying" ? "Aktivni Upiti za Kupovinu" : "Aktivni upiti za robu"}
+        {type === "buying" ? "Aktivni Upiti za Nabavku" : "Aktivni upiti za robu"}
       </h2>
       <div className="space-y-4">
         {filteredInquiries.map((inquiry) => (
