@@ -76,7 +76,6 @@ const Dashboard = () => {
         </TabsContent>
 
         <TabsContent value="selling" className="space-y-6">
-          <NewInquiryForm onSubmit={handleSubmitInquiry} type="selling" />
           <InquiryList inquiries={inquiries} type="selling" />
         </TabsContent>
       </Tabs>
