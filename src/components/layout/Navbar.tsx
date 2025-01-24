@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogIn, UserPlus, Settings, BarChart3, LogOut } from "lucide-react";
+import { LogIn, UserPlus, Settings, BarChart3, LogOut, Building2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
