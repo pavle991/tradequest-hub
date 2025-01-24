@@ -12,18 +12,14 @@ const HeroSection = () => {
               Želiš da nađeš najbolju ponudu za nabavku u svom poslu?
             </h2>
             <h2 className="text-2xl md:text-3xl text-blue-600 font-semibold">
-              Treba ti više od jedne ponude za nabavku?
+              Želiš da prodaš svoju robu ili usluge drugim firmama?
             </h2>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-            Revolucija u B2B Nabavci
+            Digitalna B2B Platforma
           </h1>
-          <p className="text-xl md:text-2xl text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
-            Objavi upit za robu ili uslugu i dobij više ponuda od proverenih dobavljača.
-            Uporedi cene, uslove isporuke i kvalitet - sve na jednom mestu.
-          </p>
-          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Jednostavno pregovaraj oko uslova nabavke i izaberi najbolju ponudu za svoje poslovanje.
+          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Objavi upit, uporedi ponude i izaberi najbolje uslove - sve na jednom mestu.
           </p>
           <div className="flex justify-center gap-6">
             <Link to="/register">
