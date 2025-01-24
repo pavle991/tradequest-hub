@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InquiryChat } from "@/components/dashboard/InquiryChat"
 import { InvoiceGenerator } from "@/components/dashboard/InvoiceGenerator"
+import { CompanyProfile } from "@/components/dashboard/CompanyProfile"
 import { Analytics } from "@/components/dashboard/Analytics"
 
 type Inquiry = {
@@ -95,6 +96,8 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto py-6 space-y-8">
+      <CompanyProfile />
+      
       <Tabs defaultValue="buying" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="buying">Kupovina</TabsTrigger>
@@ -143,16 +146,11 @@ const Dashboard = () => {
                       {inquiry.status}
                     </span>
                   </div>
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4">
                     <InquiryChat
                       inquiryId={inquiry.id}
                       inquiryTitle={inquiry.title}
                       onClose={() => {}}
-                    />
-                    <InvoiceGenerator
-                      inquiryId={inquiry.id}
-                      inquiryTitle={inquiry.title}
-                      onClose={() => handleCloseInquiry(inquiry.id)}
                     />
                   </div>
                 </Card>
