@@ -15,8 +15,8 @@ const HeroSection = () => {
               Želiš da prodaš svoju robu ili usluge drugim firmama?
             </h2>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-            Digitalna B2B Platforma
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-8 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-blue-600 to-indigo-600 animate-gradient">
+            Revolucija u B2B Nabavci i Prodaji
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
             Objavi upit, uporedi ponude i izaberi najbolje uslove - sve na jednom mestu.
