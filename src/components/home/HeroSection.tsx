@@ -7,12 +7,23 @@ const HeroSection = () => {
     <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="text-center">
+          <div className="flex flex-col gap-4 mb-8">
+            <h2 className="text-2xl md:text-3xl text-blue-600 font-semibold">
+              Želiš da nađeš najbolju ponudu za nabavku u svom poslu?
+            </h2>
+            <h2 className="text-2xl md:text-3xl text-blue-600 font-semibold">
+              Treba ti više od jedne ponude za nabavku?
+            </h2>
+          </div>
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
             Revolucija u B2B Nabavci
           </h1>
+          <p className="text-xl md:text-2xl text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
+            Objavi upit za robu ili uslugu i dobij više ponuda od proverenih dobavljača.
+            Uporedi cene, uslove isporuke i kvalitet - sve na jednom mestu.
+          </p>
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Povežite se sa pouzdanim dobavljačima, pojednostavite pregovore i upravljajte
-            transakcijama na jednoj sigurnoj platformi.
+            Jednostavno pregovaraj oko uslova nabavke i izaberi najbolju ponudu za svoje poslovanje.
           </p>
           <div className="flex justify-center gap-6">
             <Link to="/register">
