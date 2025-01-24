@@ -1,13 +1,15 @@
 import { Card } from "@/components/ui/card"
 import { InquiryChat } from "./InquiryChat"
 import { InvoiceGenerator } from "./InvoiceGenerator"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, MessageCircle } from "lucide-react"
+import { MessageCircle } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 type Inquiry = {
   id: number
@@ -171,24 +173,25 @@ export const InquiryList = ({ inquiries, type }: InquiryListProps) => {
           <div className="space-y-4">
             {agreedDeals.map((deal) => (
               <Card key={deal.id} className="p-4">
-                <Collapsible>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-semibold">{deal.title}</h3>
-                      <div className="flex flex-col gap-1">
-                        <p className="text-sm text-gray-600">Dogovoreno sa: {deal.seller}</p>
-                        <p className="text-sm text-gray-500">Datum: {deal.date}</p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex justify-between items-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">{deal.title}</h3>
+                        <div className="flex flex-col gap-1">
+                          <p className="text-sm text-gray-600">Dogovoreno sa: {deal.seller}</p>
+                          <p className="text-sm text-gray-500">Datum: {deal.date}</p>
+                        </div>
                       </div>
-                    </div>
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm">
                         <MessageCircle className="h-4 w-4" />
-                        <ChevronDown className="h-4 w-4" />
                       </Button>
-                    </CollapsibleTrigger>
-                  </div>
-                  
-                  <CollapsibleContent>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>{deal.title}</DialogTitle>
+                    </DialogHeader>
                     <div className="mt-4 bg-gray-50 rounded-lg p-4 space-y-3">
                       {deal.messages.map((message) => (
                         <div key={message.id} className={`flex ${message.sender === "Kupac" ? "justify-end" : "justify-start"}`}>
@@ -207,8 +210,8 @@ export const InquiryList = ({ inquiries, type }: InquiryListProps) => {
                         onClose={() => {}}
                       />
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  </DialogContent>
+                </Dialog>
               </Card>
             ))}
           </div>
