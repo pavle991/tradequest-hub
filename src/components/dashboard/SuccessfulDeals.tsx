@@ -27,7 +27,6 @@ export const SuccessfulDeals = ({ deals }: SuccessfulDealsProps) => {
               <InquiryChat
                 inquiryId={deal.id}
                 inquiryTitle={deal.title}
-                messages={deal.messages}
                 onClose={() => {}}
               />
             </div>
