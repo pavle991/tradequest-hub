@@ -23,7 +23,7 @@ const HowItWorks = () => {
             icon={<UserPlus className="w-8 h-8 text-blue-600" />}
             title="1. Registracija na platformu"
             items={[
-              "Posetite početnu stranicu i kliknite na „Registruj se"",
+              'Posetite početnu stranicu i kliknite na "Registruj se"',
               "Unesite osnovne podatke o svojoj firmi (naziv, email, PIB, ako želite i broj telefona)",
               "Odaberite kategorije robe ili usluga kojima se bavite",
               "Nakon potvrde registracije, dobićete pristup svim funkcionalnostima"
@@ -46,7 +46,7 @@ const HowItWorks = () => {
             icon={<PlusCircle className="w-8 h-8 text-blue-600" />}
             title="3. Slanje (kreiranje) novog upita"
             items={[
-              "Kliknite na „Novi upit" ili „Dodaj zahtev"",
+              'Kliknite na "Novi upit" ili "Dodaj zahtev"',
               "Upišite u slobodno polje šta vam je tačno potrebno",
               "Platforma koristi AI kategorizaciju kako bi izdvojila ključne reči",
               "Automatski se kreira upit vidljiv svim relevantnim firmama"
@@ -59,7 +59,7 @@ const HowItWorks = () => {
             items={[
               "Platforma prikazuje listu aktuelnih zahteva koji odgovaraju vašim ponudama",
               "Kliknite na upit koji vas zanima za detalje i mogućnost odgovora",
-              "Dostavljanje ponude kroz „Chat/Tiket" sistem"
+              "Dostavljanje ponude kroz Chat/Tiket sistem"
             ]}
           />
 
