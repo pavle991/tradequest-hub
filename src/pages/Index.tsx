@@ -6,12 +6,20 @@ import CTASection from "@/components/home/CTASection";
 
 const Index = () => {
   return (
-    <div className="animate-fade-in">
+    <div className="overflow-hidden">
       <HeroSection />
-      <FeaturesSection />
-      <RoadmapSection />
-      <StatsSection />
-      <CTASection />
+      <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}>
+        <FeaturesSection />
+      </div>
+      <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
+        <RoadmapSection />
+      </div>
+      <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.6s", animationFillMode: "forwards" }}>
+        <StatsSection />
+      </div>
+      <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}>
+        <CTASection />
+      </div>
     </div>
   );
 };
