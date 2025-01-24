@@ -27,11 +27,7 @@ export const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <img 
-                src="/lovable-uploads/c766ab6e-bbb3-40c9-9e46-92cde5f2a1b5.png" 
-                alt="Amazon Logo" 
-                className="h-8 w-auto"
-              />
+              <Building2 className="h-8 w-8" />
               <span className="font-bold text-xl text-gray-900">B2B Platforma</span>
             </Link>
           </div>
