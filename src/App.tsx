@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import Index from "@/pages/Index";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -33,6 +34,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Index />} />
         <Route 
           path="/login" 
           element={user ? <Navigate to="/dashboard" /> : <Login />} 
@@ -44,10 +46,6 @@ function App() {
         <Route 
           path="/dashboard" 
           element={user ? <Dashboard /> : <Navigate to="/login" />} 
-        />
-        <Route 
-          path="/" 
-          element={<Navigate to={user ? "/dashboard" : "/login"} />} 
         />
       </Routes>
       <Toaster />
