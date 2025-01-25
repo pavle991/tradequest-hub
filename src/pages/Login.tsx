@@ -2,26 +2,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 
 const formSchema = z.object({
   email: z.string().email("Unesite validnu email adresu"),
-  password: z.string().min(1, "Lozinka je obavezna"),
+  password: z.string().min(6, "Lozinka mora imati najmanje 6 karaktera"),
 });
 
 const Login = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -31,11 +29,25 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // Ovde će kasnije biti integracija sa backend-om
-    toast.success("Uspešno ste se prijavili!");
-    navigate("/dashboard");
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsLoading(true);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) throw error;
+
+      toast.success("Uspešno ste se prijavili!");
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || "Došlo je do greške prilikom prijave");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -60,6 +72,7 @@ const Login = () => {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="password"
@@ -73,7 +86,17 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">Prijavi se</Button>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Prijava u toku..." : "Prijavi se"}
+              </Button>
+
+              <p className="text-center text-sm text-gray-600">
+                Nemate nalog?{" "}
+                <Link to="/register" className="text-primary hover:underline">
+                  Registrujte se
+                </Link>
+              </p>
             </form>
           </Form>
         </CardContent>
