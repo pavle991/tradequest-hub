@@ -9,7 +9,215 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      inquiries: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          inquiry_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          inquiry_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          inquiry_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          inquiry_id: string
+          price: number
+          seller_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          description: string
+          id?: string
+          inquiry_id: string
+          price: number
+          seller_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          inquiry_id?: string
+          price?: number
+          seller_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          city: string | null
+          communication_language: string | null
+          company_name: string
+          company_number: string | null
+          contact_name: string | null
+          contact_position: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          facebook: string | null
+          founding_year: number | null
+          id: string
+          instagram: string | null
+          linkedin: string | null
+          phone: string | null
+          pib: string | null
+          postal_code: string | null
+          preferred_communication: string | null
+          region: string | null
+          updated_at: string
+          website: string | null
+          working_hours: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          communication_language?: string | null
+          company_name: string
+          company_number?: string | null
+          contact_name?: string | null
+          contact_position?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          facebook?: string | null
+          founding_year?: number | null
+          id: string
+          instagram?: string | null
+          linkedin?: string | null
+          phone?: string | null
+          pib?: string | null
+          postal_code?: string | null
+          preferred_communication?: string | null
+          region?: string | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          communication_language?: string | null
+          company_name?: string
+          company_number?: string | null
+          contact_name?: string | null
+          contact_position?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          facebook?: string | null
+          founding_year?: number | null
+          id?: string
+          instagram?: string | null
+          linkedin?: string | null
+          phone?: string | null
+          pib?: string | null
+          postal_code?: string | null
+          preferred_communication?: string | null
+          region?: string | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

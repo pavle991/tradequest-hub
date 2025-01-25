@@ -14,6 +14,7 @@ import { SocialMediaForm } from "@/components/register/SocialMediaForm";
 import { PreferencesForm } from "@/components/register/PreferencesForm";
 import { DescriptionForm } from "@/components/register/DescriptionForm";
 import { PasswordForm } from "@/components/register/PasswordForm";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   companyName: z.string().min(2, "Naziv firme mora imati najmanje 2 karaktera"),
@@ -48,6 +49,7 @@ const formSchema = z.object({
 const Register = () => {
   const navigate = useNavigate();
   const [tags, setTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,10 +81,59 @@ const Register = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ ...values, tags });
-    toast.success("Uspešno ste se registrovali!");
-    navigate("/dashboard");
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsLoading(true);
+      
+      // Register user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        throw new Error("Registracija nije uspela");
+      }
+
+      // Update profile information
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          company_name: values.companyName,
+          company_number: values.companyNumber,
+          pib: values.pib,
+          founding_year: values.foundingYear ? parseInt(values.foundingYear) : null,
+          website: values.website,
+          description: values.description,
+          contact_name: values.contactName,
+          contact_position: values.contactPosition,
+          phone: values.phone,
+          working_hours: values.workingHours,
+          address: values.address,
+          city: values.city,
+          postal_code: values.postalCode,
+          region: values.region,
+          linkedin: values.linkedin,
+          facebook: values.facebook,
+          instagram: values.instagram,
+          preferred_communication: values.preferredCommunication,
+          communication_language: values.communicationLanguage,
+          currency: values.currency,
+        })
+        .eq('id', authData.user.id);
+
+      if (profileError) throw profileError;
+
+      toast.success("Uspešno ste se registrovali! Proverite email za verifikaciju.");
+      navigate("/login");
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error(error.message || "Došlo je do greške prilikom registracije");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,7 +177,9 @@ const Register = () => {
                 handleFileImport={handleFileImport}
               />
               <PasswordForm form={form} />
-              <Button type="submit" className="w-full">Registruj se</Button>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Registracija u toku..." : "Registruj se"}
+              </Button>
             </form>
           </Form>
         </CardContent>
