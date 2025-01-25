@@ -38,20 +38,10 @@ const formSchema = z.object({
   region: z.string().optional(),
   contactName: z.string().optional(),
   contactPosition: z.string().optional(),
-  alternativeEmail: z.string().email("Unesite validnu email adresu").optional(),
   workingHours: z.string().optional(),
-  linkedin: z.string()
-    .regex(urlRegex, "Unesite validnu LinkedIn adresu")
-    .optional()
-    .or(z.literal("")),
-  facebook: z.string()
-    .regex(urlRegex, "Unesite validnu Facebook adresu")
-    .optional()
-    .or(z.literal("")),
-  instagram: z.string()
-    .regex(urlRegex, "Unesite validnu Instagram adresu")
-    .optional()
-    .or(z.literal("")),
+  linkedin: z.string().optional(),
+  facebook: z.string().optional(),
+  instagram: z.string().optional(),
   preferredCommunication: z.enum(["email", "phone", "chat"]).optional(),
   communicationLanguage: z.enum(["sr", "en"]).optional(),
   currency: z.enum(["RSD", "EUR", "USD"]).optional(),
@@ -84,7 +74,6 @@ const Register = () => {
       region: "",
       contactName: "",
       contactPosition: "",
-      alternativeEmail: "",
       workingHours: "",
       linkedin: "",
       facebook: "",
@@ -98,6 +87,7 @@ const Register = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
+      console.log("Starting registration process...");
       
       // Register user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -105,15 +95,21 @@ const Register = () => {
         password: values.password,
       });
 
+      console.log("Auth response:", { authData, authError });
+
       if (authError) {
+        console.error("Auth error:", authError);
         toast.error(authError.message);
         return;
       }
 
       if (!authData.user) {
+        console.error("No user data returned");
         toast.error("Registracija nije uspela");
         return;
       }
+
+      console.log("User registered successfully, updating profile...");
 
       // Update profile information
       const { error: profileError } = await supabase
@@ -142,12 +138,15 @@ const Register = () => {
         })
         .eq('id', authData.user.id);
 
+      console.log("Profile update response:", { profileError });
+
       if (profileError) {
         console.error('Profile update error:', profileError);
         toast.error("Greška pri ažuriranju profila");
         return;
       }
 
+      console.log("Registration completed successfully");
       toast.success("Uspešno ste se registrovali! Možete se prijaviti.");
       navigate("/login");
     } catch (error: any) {
