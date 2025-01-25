@@ -16,6 +16,8 @@ import { DescriptionForm } from "@/components/register/DescriptionForm";
 import { PasswordForm } from "@/components/register/PasswordForm";
 import { supabase } from "@/integrations/supabase/client";
 
+const urlRegex = /^(https?:\/\/|www\.)[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+([\/\w-]*)*\/?$/;
+
 const formSchema = z.object({
   companyName: z.string().min(2, "Naziv firme mora imati najmanje 2 karaktera"),
   email: z.string().email("Unesite validnu email adresu"),
@@ -26,7 +28,10 @@ const formSchema = z.object({
   description: z.string().min(10, "Opis mora imati najmanje 10 karaktera"),
   companyNumber: z.string().optional(),
   foundingYear: z.string().optional(),
-  website: z.string().url("Unesite validnu web adresu").optional(),
+  website: z.string()
+    .regex(urlRegex, "Unesite validnu web adresu (može početi sa www. ili http://)")
+    .optional()
+    .or(z.literal("")),
   address: z.string().optional(),
   city: z.string().optional(),
   postalCode: z.string().optional(),
@@ -35,9 +40,18 @@ const formSchema = z.object({
   contactPosition: z.string().optional(),
   alternativeEmail: z.string().email("Unesite validnu email adresu").optional(),
   workingHours: z.string().optional(),
-  linkedin: z.string().url("Unesite validnu LinkedIn adresu").optional(),
-  facebook: z.string().url("Unesite validnu Facebook adresu").optional(),
-  instagram: z.string().url("Unesite validnu Instagram adresu").optional(),
+  linkedin: z.string()
+    .regex(urlRegex, "Unesite validnu LinkedIn adresu")
+    .optional()
+    .or(z.literal("")),
+  facebook: z.string()
+    .regex(urlRegex, "Unesite validnu Facebook adresu")
+    .optional()
+    .or(z.literal("")),
+  instagram: z.string()
+    .regex(urlRegex, "Unesite validnu Instagram adresu")
+    .optional()
+    .or(z.literal("")),
   preferredCommunication: z.enum(["email", "phone", "chat"]).optional(),
   communicationLanguage: z.enum(["sr", "en"]).optional(),
   currency: z.enum(["RSD", "EUR", "USD"]).optional(),
