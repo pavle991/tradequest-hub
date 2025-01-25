@@ -105,10 +105,14 @@ const Register = () => {
         password: values.password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        toast.error(authError.message);
+        return;
+      }
 
       if (!authData.user) {
-        throw new Error("Registracija nije uspela");
+        toast.error("Registracija nije uspela");
+        return;
       }
 
       // Update profile information
@@ -138,35 +142,19 @@ const Register = () => {
         })
         .eq('id', authData.user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        toast.error("Greška pri ažuriranju profila");
+        return;
+      }
 
-      toast.success("Uspešno ste se registrovali! Proverite email za verifikaciju.");
+      toast.success("Uspešno ste se registrovali! Možete se prijaviti.");
       navigate("/login");
     } catch (error: any) {
       console.error('Registration error:', error);
       toast.error(error.message || "Došlo je do greške prilikom registracije");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const content = e.target?.result as string;
-          const products = JSON.parse(content);
-          const productTags = products.map((p: any) => p.category).filter((c: string) => c);
-          const uniqueTags = [...new Set([...tags, ...productTags])];
-          setTags(uniqueTags);
-          toast.success("Proizvodi su uspešno importovani!");
-        } catch (error) {
-          toast.error("Greška pri učitavanju fajla. Proverite format.");
-        }
-      };
-      reader.readAsText(file);
     }
   };
 
@@ -188,7 +176,7 @@ const Register = () => {
                 form={form}
                 tags={tags}
                 setTags={setTags}
-                handleFileImport={handleFileImport}
+                handleFileImport={() => {}}
               />
               <PasswordForm form={form} />
               <Button type="submit" className="w-full" disabled={isLoading}>
