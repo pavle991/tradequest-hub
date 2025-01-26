@@ -62,7 +62,7 @@ export const NewInquiryForm = ({ onSubmit, type }: NewInquiryFormProps) => {
           type,
           tags,
           user_id: user.id,
-          status: 'aktivan'
+          status: 'active' // Changed from 'aktivan' to 'active' to match database constraint
         })
         .select()
         .single()
