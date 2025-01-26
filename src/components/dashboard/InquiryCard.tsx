@@ -54,13 +54,18 @@ export const InquiryCard = ({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: messages } = await supabase
+      let query = supabase
         .from('messages')
         .select('*')
         .eq('inquiry_id', inquiry.id)
         .eq('status', 'delivered')
         .neq('sender_id', user.id)
-        .is('offer_id', type === 'selling' ? offerId : null)
+
+      if (type === 'selling' && offerId) {
+        query = query.eq('offer_id', offerId)
+      }
+
+      const { data: messages } = await query
 
       setUnreadCount(messages?.length || 0)
     } catch (error) {
@@ -85,12 +90,10 @@ export const InquiryCard = ({
           table: 'messages',
           filter: `inquiry_id=eq.${inquiry.id}`
         },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            const { data: { user } } = supabase.auth.getUser()
-            if (user && payload.new.sender_id !== user.id) {
-              setUnreadCount(prev => prev + 1)
-            }
+        async (payload) => {
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user && payload.eventType === 'INSERT' && payload.new.sender_id !== user.id) {
+            setUnreadCount(prev => prev + 1)
           } else if (payload.eventType === 'UPDATE' && payload.new.status === 'read') {
             checkUnreadMessages()
           }
