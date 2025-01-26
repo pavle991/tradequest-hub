@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { type Message } from "@/components/dashboard/types"
 
-export const useInquiryChat = (inquiryId: string) => {
+export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
   const [messages, setMessages] = useState<Message[]>()
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
@@ -18,7 +18,6 @@ export const useInquiryChat = (inquiryId: string) => {
         if (user) {
           setUserId(user.id)
           
-          // Check if current user is the buyer
           const { data: inquiry, error } = await supabase
             .from('inquiries')
             .select('user_id')
@@ -38,7 +37,6 @@ export const useInquiryChat = (inquiryId: string) => {
     }
     getCurrentUser()
 
-    // Subscribe to messages for this inquiry
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -47,12 +45,13 @@ export const useInquiryChat = (inquiryId: string) => {
           event: '*',
           schema: 'public',
           table: 'messages',
-          filter: `inquiry_id=eq.${inquiryId}`
+          filter: offerId 
+            ? `inquiry_id=eq.${inquiryId} AND offer_id=eq.${offerId}`
+            : `inquiry_id=eq.${inquiryId}`
         },
         async (payload) => {
           if (payload.eventType === 'INSERT') {
             const newMessage = payload.new
-            // Fetch sender profile to get proper display name
             const { data: senderProfile } = await supabase
               .from('profiles')
               .select('company_name')
@@ -80,17 +79,16 @@ export const useInquiryChat = (inquiryId: string) => {
       )
       .subscribe()
 
-    // Load existing messages
     loadExistingMessages()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [inquiryId, userId])
+  }, [inquiryId, userId, offerId])
 
   const loadExistingMessages = async () => {
     try {
-      const { data: existingMessages, error } = await supabase
+      const query = supabase
         .from('messages')
         .select(`
           *,
@@ -98,6 +96,12 @@ export const useInquiryChat = (inquiryId: string) => {
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
+
+      if (offerId) {
+        query.eq('offer_id', offerId)
+      }
+
+      const { data: existingMessages, error } = await query
 
       if (error) {
         console.error('Error loading messages:', error)
@@ -126,14 +130,17 @@ export const useInquiryChat = (inquiryId: string) => {
     if (!newMessage.trim() || !userId) return
     
     try {
+      const messageData = {
+        inquiry_id: inquiryId,
+        sender_id: userId,
+        content: newMessage,
+        status: 'delivered',
+        ...(offerId && { offer_id: offerId })
+      }
+
       const { error } = await supabase
         .from('messages')
-        .insert({
-          inquiry_id: inquiryId,
-          sender_id: userId,
-          content: newMessage,
-          status: 'delivered'
-        })
+        .insert(messageData)
 
       if (error) {
         toast({

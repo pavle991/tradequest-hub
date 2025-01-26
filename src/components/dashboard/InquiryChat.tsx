@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { ChatHeader } from "./chat/ChatHeader"
@@ -31,7 +32,7 @@ export const InquiryChat = ({
     setSelectedSeller,
     handleSendMessage,
     handleMarkAsRead
-  } = useInquiryChat(inquiryId)
+  } = useInquiryChat(inquiryId, offerId)
   
   const { offer } = useOfferData(offerId)
 
@@ -43,6 +44,9 @@ export const InquiryChat = ({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
+        <DialogTitle className="text-lg font-semibold">
+          Chat za ponudu
+        </DialogTitle>
         <ChatHeader 
           title={inquiryTitle}
           offer={offer}

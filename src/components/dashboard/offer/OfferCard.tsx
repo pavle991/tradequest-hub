@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SellerRating } from "../SellerRating"
 import { InquiryChat } from "../InquiryChat"
+import { Badge } from "@/components/ui/badge"
 
 type OfferCardProps = {
   offer: {
@@ -13,6 +14,7 @@ type OfferCardProps = {
     seller_rating: number
     total_sales: number
     number_of_ratings: number
+    status: string
     profiles: {
       company_name: string
     }
@@ -46,9 +48,14 @@ export const OfferCard = ({
           <p className="mt-2 font-semibold">
             Cena: {offer.price.toLocaleString('sr-RS')} {offer.currency}
           </p>
+          <div className="mt-2">
+            <Badge variant={offer.status === 'pending' ? 'secondary' : 'success'}>
+              {offer.status === 'pending' ? 'Ponuda poslata' : 'U razgovoru'}
+            </Badge>
+          </div>
         </div>
         <div>
-          {isBuyer && (
+          {(isBuyer || offer.status !== 'pending') && (
             selectedOfferId === offer.id ? (
               <InquiryChat
                 inquiryId={inquiryId}
@@ -61,7 +68,7 @@ export const OfferCard = ({
                 variant="outline"
                 onClick={() => onSelectOffer(offer.id)}
               >
-                Započni razgovor
+                {isBuyer ? 'Započni razgovor' : 'Pogledaj razgovor'}
               </Button>
             )
           )}
