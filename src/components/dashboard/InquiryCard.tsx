@@ -54,15 +54,18 @@ export const InquiryCard = ({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: messages, error } = await supabase
+      const query = supabase
         .from('messages')
         .select('*')
         .eq('inquiry_id', inquiry.id)
         .eq('status', 'delivered')
         .neq('sender_id', user.id)
 
-      if (error) throw error
-      
+      if (type === 'selling' && offerId) {
+        query.eq('offer_id', offerId)
+      }
+
+      const { data: messages } = await query
       setUnreadCount(messages?.length || 0)
     } catch (error) {
       console.error('Error checking unread messages:', error)
@@ -95,7 +98,7 @@ export const InquiryCard = ({
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [inquiry.id, type])
+  }, [inquiry.id, type, offerId])
 
   return (
     <Card key={inquiry.id} className="p-6">

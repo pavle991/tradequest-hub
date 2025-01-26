@@ -10,6 +10,8 @@ import { ChatMessageList } from "./chat/ChatMessageList"
 import { ChatInput } from "./chat/ChatInput"
 import { useInquiryChat } from "@/hooks/use-inquiry-chat"
 import { useOfferData } from "@/hooks/use-offer-data"
+import { supabase } from "@/integrations/supabase/client"
+import { useEffect } from "react"
 
 type InquiryChatProps = {
   inquiryId: string
@@ -36,8 +38,34 @@ export const InquiryChat = ({
   
   const { offer } = useOfferData(offerId)
 
+  const markMessagesAsRead = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const query = supabase
+        .from('messages')
+        .update({ status: 'read' })
+        .eq('inquiry_id', inquiryId)
+        .eq('status', 'delivered')
+        .neq('sender_id', user.id)
+
+      if (offerId) {
+        query.eq('offer_id', offerId)
+      }
+
+      await query
+    } catch (error) {
+      console.error('Error marking messages as read:', error)
+    }
+  }
+
   return (
-    <Dialog>
+    <Dialog onOpenChange={(open) => {
+      if (open) {
+        markMessagesAsRead()
+      }
+    }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           Otvori chat
