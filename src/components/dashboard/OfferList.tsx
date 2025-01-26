@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { SellerRating } from "./SellerRating"
 import { InquiryChat } from "./InquiryChat"
 import { supabase } from "@/integrations/supabase/client"
