@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import {
 import { OfferForm } from "./OfferForm"
 import { OfferList } from "./OfferList"
 import { type Inquiry } from "./types"
+import { supabase } from "@/integrations/supabase/client"
 
 type ActiveInquiriesProps = {
   inquiries: Inquiry[]
@@ -21,6 +22,27 @@ type ActiveInquiriesProps = {
 export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesProps) => {
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null)
   const [showOfferForm, setShowOfferForm] = useState(false)
+  const [offersCount, setOffersCount] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    if (type === "buying") {
+      fetchOffersCount()
+    }
+  }, [inquiries, type])
+
+  const fetchOffersCount = async () => {
+    for (const inquiry of inquiries) {
+      const { count } = await supabase
+        .from('offers')
+        .select('*', { count: 'exact', head: true })
+        .eq('inquiry_id', inquiry.id)
+
+      setOffersCount(prev => ({
+        ...prev,
+        [inquiry.id]: count || 0
+      }))
+    }
+  }
 
   if (loading) {
     return <div>Učitavanje upita...</div>
@@ -58,7 +80,7 @@ export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesPro
                 ))}
               </div>
             </div>
-            {type === "selling" && (
+            {type === "selling" ? (
               <Button
                 onClick={() => {
                   setSelectedInquiryId(inquiry.id)
@@ -67,6 +89,22 @@ export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesPro
               >
                 Pošalji ponudu
               </Button>
+            ) : (
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex items-center gap-2">
+                  {offersCount[inquiry.id] > 0 && (
+                    <Badge variant="secondary">
+                      {offersCount[inquiry.id]} {offersCount[inquiry.id] === 1 ? 'ponuda' : 'ponuda'}
+                    </Badge>
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedInquiryId(inquiry.id)}
+                  >
+                    Pogledaj ponude
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
 
