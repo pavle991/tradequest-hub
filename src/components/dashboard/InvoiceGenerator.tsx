@@ -113,7 +113,7 @@ export const InvoiceGenerator = ({
           offer_id: offerId,
           seller_id: user.id,
           invoice_number: `INV-${Date.now()}`,
-          due_date: new Date(invoiceData.dueDate),
+          due_date: invoiceData.dueDate, // Now passing the string directly
           total_amount: calculateTotalAmount(),
           vat_amount: calculateVatAmount(),
           total_with_vat: calculateTotalAmount() + calculateVatAmount(),
