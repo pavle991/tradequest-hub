@@ -16,7 +16,7 @@ import { useEffect } from "react"
 type InquiryChatProps = {
   inquiryId: string
   inquiryTitle: string
-  offerId?: string
+  offerId?: string | null
   onClose: () => void
 }
 
