@@ -118,7 +118,7 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
               </p>
             </div>
             <div>
-              {(isBuyer || hasMessages[inquiryId]) && (
+              {isBuyer && (
                 selectedOfferId === offer.id ? (
                   <InquiryChat
                     inquiryId={inquiryId}
