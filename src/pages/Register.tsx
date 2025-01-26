@@ -87,15 +87,12 @@ const Register = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      console.log("Starting registration process...");
       
       // Register user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
       });
-
-      console.log("Auth response:", { authData, authError });
 
       if (authError) {
         console.error("Auth error:", authError);
@@ -108,8 +105,6 @@ const Register = () => {
         toast.error("Registracija nije uspela");
         return;
       }
-
-      console.log("User registered successfully, updating profile...");
 
       // Update profile information
       const { error: profileError } = await supabase
@@ -135,10 +130,9 @@ const Register = () => {
           preferred_communication: values.preferredCommunication,
           communication_language: values.communicationLanguage,
           currency: values.currency,
+          tags: tags,
         })
         .eq('id', authData.user.id);
-
-      console.log("Profile update response:", { profileError });
 
       if (profileError) {
         console.error('Profile update error:', profileError);
@@ -146,7 +140,6 @@ const Register = () => {
         return;
       }
 
-      console.log("Registration completed successfully");
       toast.success("Uspešno ste se registrovali! Možete se prijaviti.");
       navigate("/login");
     } catch (error: any) {
