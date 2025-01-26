@@ -49,7 +49,7 @@ export const OfferCard = ({
             Cena: {offer.price.toLocaleString('sr-RS')} {offer.currency}
           </p>
           <div className="mt-2">
-            <Badge variant={offer.status === 'pending' ? 'secondary' : 'success'}>
+            <Badge variant={offer.status === 'pending' ? 'secondary' : 'outline'}>
               {offer.status === 'pending' ? 'Ponuda poslata' : 'U razgovoru'}
             </Badge>
           </div>

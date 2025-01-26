@@ -59,6 +59,7 @@ export type Database = {
           created_at: string
           id: string
           inquiry_id: string
+          offer_id: string | null
           sender_id: string
           status: string
         }
@@ -67,6 +68,7 @@ export type Database = {
           created_at?: string
           id?: string
           inquiry_id: string
+          offer_id?: string | null
           sender_id: string
           status?: string
         }
@@ -75,6 +77,7 @@ export type Database = {
           created_at?: string
           id?: string
           inquiry_id?: string
+          offer_id?: string | null
           sender_id?: string
           status?: string
         }
@@ -84,6 +87,13 @@ export type Database = {
             columns: ["inquiry_id"]
             isOneToOne: false
             referencedRelation: "inquiries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
             referencedColumns: ["id"]
           },
           {

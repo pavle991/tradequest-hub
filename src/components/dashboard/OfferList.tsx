@@ -13,6 +13,7 @@ type Offer = {
   seller_rating: number
   total_sales: number
   number_of_ratings: number
+  status: string
   profiles: {
     company_name: string
   }

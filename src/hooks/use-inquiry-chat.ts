@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast"
 import { type Message } from "@/components/dashboard/types"
 
 export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
-  const [messages, setMessages] = useState<Message[]>()
+  const [messages, setMessages] = useState<Message[]>([])
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
   const [userId, setUserId] = useState<string | null>(null)
