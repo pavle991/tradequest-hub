@@ -54,7 +54,7 @@ export const Navbar = () => {
           </div>
           <div className="flex items-center space-x-4">
             {user && companyName && (
-              <span className="text-gray-700 font-medium">{companyName}</span>
+              <span className="text-gray-700 font-medium hidden md:block">{companyName}</span>
             )}
             {!user ? <AuthButtons /> : <UserMenu />}
           </div>
