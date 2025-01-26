@@ -60,6 +60,7 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
       fetchOffer()
     }
 
+    // Subscribe to messages for this inquiry
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -70,12 +71,19 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
           table: 'messages',
           filter: `inquiry_id=eq.${inquiryId}`
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
             const newMessage = payload.new
+            // Fetch sender profile to get proper display name
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('company_name')
+              .eq('id', newMessage.sender_id)
+              .single()
+
             setMessages(prev => [...prev, {
               id: newMessage.id,
-              sender: newMessage.sender_id === userId ? 'Kupac' : 'Prodavac',
+              sender: newMessage.sender_id === userId ? 'Kupac' : senderProfile?.company_name || 'Prodavac',
               content: newMessage.content,
               timestamp: new Date(newMessage.created_at).toLocaleTimeString('sr-RS', { 
                 hour: '2-digit', 
@@ -93,6 +101,43 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
         }
       )
       .subscribe()
+
+    // Load existing messages
+    const loadExistingMessages = async () => {
+      try {
+        const { data: existingMessages, error } = await supabase
+          .from('messages')
+          .select(`
+            *,
+            sender:profiles!messages_sender_id_fkey(company_name)
+          `)
+          .eq('inquiry_id', inquiryId)
+          .order('created_at', { ascending: true })
+
+        if (error) {
+          console.error('Error loading messages:', error)
+          return
+        }
+
+        if (existingMessages) {
+          const formattedMessages = existingMessages.map(msg => ({
+            id: msg.id,
+            sender: msg.sender_id === userId ? 'Kupac' : msg.sender.company_name || 'Prodavac',
+            content: msg.content,
+            timestamp: new Date(msg.created_at).toLocaleTimeString('sr-RS', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            status: msg.status
+          }))
+          setMessages(formattedMessages)
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error)
+      }
+    }
+
+    loadExistingMessages()
 
     return () => {
       supabase.removeChannel(channel)
