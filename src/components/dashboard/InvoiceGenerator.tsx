@@ -37,6 +37,7 @@ export const InvoiceGenerator = ({
   offerId,
   onClose 
 }: InvoiceGeneratorProps) => {
+  const [open, setOpen] = useState(false)
   const [invoiceData, setInvoiceData] = useState({
     buyerName: "",
     buyerAddress: "",
@@ -95,7 +96,55 @@ export const InvoiceGenerator = ({
     setItems(newItems)
   }
 
+  const validateForm = () => {
+    if (!invoiceData.buyerName.trim()) {
+      toast({
+        title: "Greška",
+        description: "Unesite ime kupca",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    if (!invoiceData.buyerAddress.trim()) {
+      toast({
+        title: "Greška",
+        description: "Unesite adresu kupca",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    if (!invoiceData.dueDate) {
+      toast({
+        title: "Greška",
+        description: "Unesite rok plaćanja",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    const invalidItems = items.some(item => 
+      !item.description.trim() || 
+      item.quantity <= 0 || 
+      item.unitPrice <= 0
+    )
+
+    if (invalidItems) {
+      toast({
+        title: "Greška",
+        description: "Proverite unete stavke fakture",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    return true
+  }
+
   const handleGenerateInvoice = async () => {
+    if (!validateForm()) return
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -145,6 +194,7 @@ export const InvoiceGenerator = ({
         title: "Uspešno",
         description: "Faktura je uspešno generisana",
       })
+      setOpen(false)
       onClose()
     } catch (error) {
       console.error('Error generating invoice:', error)
@@ -157,7 +207,7 @@ export const InvoiceGenerator = ({
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           Generiši fakturu
