@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
@@ -27,6 +28,7 @@ export const InvoiceGenerator = ({
   onClose 
 }: InvoiceGeneratorProps) => {
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [invoiceData, setInvoiceData] = useState({
     buyerName: "",
     buyerAddress: "",
@@ -135,6 +137,9 @@ export const InvoiceGenerator = ({
     if (!validateForm()) return
 
     try {
+      setLoading(true)
+      console.log("Starting invoice generation process...")
+
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast({
@@ -145,7 +150,14 @@ export const InvoiceGenerator = ({
         return
       }
 
-      console.log("Creating invoice...")
+      console.log("Creating invoice with data:", {
+        inquiry_id: inquiryId,
+        offer_id: offerId,
+        seller_id: user.id,
+        total_amount: calculateTotalAmount(),
+        vat_amount: calculateVatAmount(),
+      })
+
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
@@ -172,6 +184,7 @@ export const InvoiceGenerator = ({
       }
 
       if (!invoice) {
+        console.error('No invoice data returned after creation')
         toast({
           title: "Greška",
           description: "Faktura nije kreirana",
@@ -180,7 +193,7 @@ export const InvoiceGenerator = ({
         return
       }
 
-      console.log("Invoice created:", invoice)
+      console.log("Invoice created successfully:", invoice)
       console.log("Creating invoice items...")
 
       const invoiceItems = items.map(item => ({
@@ -209,6 +222,7 @@ export const InvoiceGenerator = ({
       }
 
       console.log("Invoice items created successfully")
+      
       toast({
         title: "Uspešno",
         description: "Faktura je uspešno generisana",
@@ -236,6 +250,8 @@ export const InvoiceGenerator = ({
         description: "Došlo je do greške prilikom generisanja fakture",
         variant: "destructive",
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -249,6 +265,9 @@ export const InvoiceGenerator = ({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Generisanje fakture za: {inquiryTitle}</DialogTitle>
+          <DialogDescription>
+            Popunite podatke o kupcu i dodajte stavke fakture
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">
           <BuyerForm 
@@ -268,8 +287,12 @@ export const InvoiceGenerator = ({
             vatAmount={calculateVatAmount()}
           />
 
-          <Button onClick={handleGenerateInvoice} className="w-full">
-            Generiši fakturu
+          <Button 
+            onClick={handleGenerateInvoice} 
+            className="w-full"
+            disabled={loading}
+          >
+            {loading ? "Generisanje..." : "Generiši fakturu"}
           </Button>
         </div>
       </DialogContent>
