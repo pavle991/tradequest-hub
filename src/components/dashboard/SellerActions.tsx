@@ -39,6 +39,7 @@ export const SellerActions = ({
         inquiryId={inquiryId}
         inquiryTitle={inquiryTitle}
         offerId={offerId}
+        onClose={onClearUnread}
       />
     </div>
   )
