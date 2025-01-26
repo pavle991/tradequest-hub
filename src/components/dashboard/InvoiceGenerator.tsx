@@ -88,8 +88,6 @@ export const InvoiceGenerator = ({
   }
 
   const validateForm = () => {
-    console.log("Validating form data:", { invoiceData, items })
-    
     if (!invoiceData.buyerName.trim()) {
       toast({
         title: "Greška",
@@ -140,13 +138,10 @@ export const InvoiceGenerator = ({
 
     try {
       setLoading(true)
-      console.log("Starting invoice generation process...")
-      console.log("Inquiry ID:", inquiryId)
-      console.log("Offer ID:", offerId)
-
+      
+      // Get the current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        console.error("No authenticated user found")
         toast({
           title: "Greška",
           description: "Niste prijavljeni",
@@ -155,24 +150,30 @@ export const InvoiceGenerator = ({
         return
       }
 
-      console.log("Authenticated user:", user.id)
-      console.log("Creating invoice with data:", {
-        inquiry_id: inquiryId,
-        offer_id: offerId,
-        seller_id: user.id,
-        buyer_name: invoiceData.buyerName,
-        buyer_address: invoiceData.buyerAddress,
-        due_date: invoiceData.dueDate,
-        total_amount: calculateTotalAmount(),
-        vat_amount: calculateVatAmount(),
-      })
+      // Get the inquiry details to find the buyer
+      const { data: inquiry } = await supabase
+        .from('inquiries')
+        .select('user_id')
+        .eq('id', inquiryId)
+        .single()
 
+      if (!inquiry) {
+        toast({
+          title: "Greška",
+          description: "Upit nije pronađen",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Create the invoice with buyer_id from inquiry
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
           inquiry_id: inquiryId,
           offer_id: offerId,
           seller_id: user.id,
+          buyer_id: inquiry.user_id, // Set the buyer_id from inquiry
           invoice_number: `INV-${Date.now()}`,
           due_date: invoiceData.dueDate,
           total_amount: calculateTotalAmount(),
@@ -194,7 +195,6 @@ export const InvoiceGenerator = ({
       }
 
       if (!invoice) {
-        console.error('No invoice data returned after creation')
         toast({
           title: "Greška",
           description: "Faktura nije kreirana",
@@ -202,9 +202,6 @@ export const InvoiceGenerator = ({
         })
         return
       }
-
-      console.log("Invoice created successfully:", invoice)
-      console.log("Creating invoice items...")
 
       const invoiceItems = items.map(item => ({
         invoice_id: invoice.id,
@@ -216,8 +213,6 @@ export const InvoiceGenerator = ({
         amount: calculateItemAmount(item),
         vat_rate: item.vatRate,
       }))
-
-      console.log("Invoice items to create:", invoiceItems)
 
       const { error: itemsError } = await supabase
         .from('invoice_items')
@@ -232,8 +227,6 @@ export const InvoiceGenerator = ({
         })
         return
       }
-
-      console.log("Invoice items created successfully")
       
       toast({
         title: "Uspešno",
