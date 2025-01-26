@@ -1,7 +1,5 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -11,18 +9,9 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { Plus } from "lucide-react"
-import { InvoiceItem } from "./invoice/InvoiceItem"
+import { BuyerForm } from "./invoice/BuyerForm"
+import { ItemsList, type InvoiceItemData } from "./invoice/ItemsList"
 import { InvoiceSummary } from "./invoice/InvoiceSummary"
-
-type InvoiceItem = {
-  description: string
-  quantity: number
-  unitPrice: number
-  unit: string
-  discount: number
-  vatRate: number
-}
 
 type InvoiceGeneratorProps = {
   inquiryId: string
@@ -44,7 +33,7 @@ export const InvoiceGenerator = ({
     dueDate: "",
   })
 
-  const [items, setItems] = useState<InvoiceItem[]>([{
+  const [items, setItems] = useState<InvoiceItemData[]>([{
     description: "",
     quantity: 1,
     unitPrice: 0,
@@ -55,7 +44,7 @@ export const InvoiceGenerator = ({
 
   const { toast } = useToast()
 
-  const calculateItemAmount = (item: InvoiceItem) => {
+  const calculateItemAmount = (item: InvoiceItemData) => {
     const baseAmount = item.quantity * item.unitPrice
     const discountAmount = baseAmount * (item.discount / 100)
     return baseAmount - discountAmount
@@ -87,7 +76,7 @@ export const InvoiceGenerator = ({
     setItems(items.filter((_, i) => i !== index))
   }
 
-  const updateItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
+  const updateItem = (index: number, field: keyof InvoiceItemData, value: string | number) => {
     const newItems = [...items]
     newItems[index] = {
       ...newItems[index],
@@ -156,7 +145,7 @@ export const InvoiceGenerator = ({
         return
       }
 
-      // First create the invoice
+      console.log("Creating invoice...")
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
@@ -191,7 +180,9 @@ export const InvoiceGenerator = ({
         return
       }
 
-      // Then create invoice items
+      console.log("Invoice created:", invoice)
+      console.log("Creating invoice items...")
+
       const invoiceItems = items.map(item => ({
         invoice_id: invoice.id,
         description: item.description,
@@ -217,13 +208,12 @@ export const InvoiceGenerator = ({
         return
       }
 
-      // If we got here, everything was successful
+      console.log("Invoice items created successfully")
       toast({
         title: "Uspešno",
         description: "Faktura je uspešno generisana",
       })
       
-      // Reset form and close dialog
       setInvoiceData({
         buyerName: "",
         buyerAddress: "",
@@ -261,62 +251,22 @@ export const InvoiceGenerator = ({
           <DialogTitle>Generisanje fakture za: {inquiryTitle}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Ime kupca</Label>
-              <Input
-                value={invoiceData.buyerName}
-                onChange={(e) =>
-                  setInvoiceData({ ...invoiceData, buyerName: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Adresa kupca</Label>
-              <Input
-                value={invoiceData.buyerAddress}
-                onChange={(e) =>
-                  setInvoiceData({ ...invoiceData, buyerAddress: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Rok plaćanja</Label>
-              <Input
-                type="date"
-                value={invoiceData.dueDate}
-                onChange={(e) =>
-                  setInvoiceData({ ...invoiceData, dueDate: e.target.value })
-                }
-              />
-            </div>
-          </div>
+          <BuyerForm 
+            data={invoiceData}
+            onChange={setInvoiceData}
+          />
 
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Stavke fakture</h3>
-              <Button onClick={addItem} size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Dodaj stavku
-              </Button>
-            </div>
+          <ItemsList
+            items={items}
+            onAddItem={addItem}
+            onUpdateItem={updateItem}
+            onRemoveItem={removeItem}
+          />
 
-            {items.map((item, index) => (
-              <InvoiceItem
-                key={index}
-                item={item}
-                index={index}
-                onUpdate={updateItem}
-                onRemove={removeItem}
-                showRemove={items.length > 1}
-              />
-            ))}
-
-            <InvoiceSummary
-              totalAmount={calculateTotalAmount()}
-              vatAmount={calculateVatAmount()}
-            />
-          </div>
+          <InvoiceSummary
+            totalAmount={calculateTotalAmount()}
+            vatAmount={calculateVatAmount()}
+          />
 
           <Button onClick={handleGenerateInvoice} className="w-full">
             Generiši fakturu
