@@ -1,6 +1,9 @@
+import { useState, useEffect } from "react"
 import { ActiveInquiries } from "./ActiveInquiries"
 import { SuccessfulDeals } from "./SuccessfulDeals"
 import { type Inquiry, type Deal } from "./types"
+import { supabase } from "@/integrations/supabase/client"
+import { toast } from "sonner"
 
 type InquiryListProps = {
   inquiries: Inquiry[]
@@ -8,6 +11,38 @@ type InquiryListProps = {
 }
 
 export const InquiryList = ({ inquiries, type }: InquiryListProps) => {
+  const [matchingInquiries, setMatchingInquiries] = useState<Inquiry[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (type === "selling") {
+      fetchMatchingInquiries()
+    }
+  }, [type])
+
+  const fetchMatchingInquiries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('inquiries')
+        .select('*')
+        .eq('type', 'buying')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching matching inquiries:', error)
+        toast.error("Došlo je do greške prilikom učitavanja upita")
+        return
+      }
+
+      setMatchingInquiries(data as Inquiry[])
+    } catch (error) {
+      console.error('Error:', error)
+      toast.error("Došlo je do greške prilikom učitavanja upita")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const agreedDeals: Deal[] = [
     {
       id: crypto.randomUUID(),
@@ -109,8 +144,22 @@ export const InquiryList = ({ inquiries, type }: InquiryListProps) => {
   
   return (
     <div className="space-y-6">
-      <ActiveInquiries inquiries={inquiries} type={type} />
-      {type === "selling" && <SuccessfulDeals deals={agreedDeals} />}
+      {type === "selling" ? (
+        <>
+          <ActiveInquiries 
+            inquiries={matchingInquiries} 
+            type={type}
+            loading={loading}
+          />
+          <SuccessfulDeals deals={agreedDeals} />
+        </>
+      ) : (
+        <ActiveInquiries 
+          inquiries={inquiries} 
+          type={type}
+          loading={false}
+        />
+      )}
     </div>
   )
 }

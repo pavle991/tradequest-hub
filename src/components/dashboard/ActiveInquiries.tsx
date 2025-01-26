@@ -1,64 +1,76 @@
 import { Card } from "@/components/ui/card"
-import { InquiryChat } from "./InquiryChat"
-import { InvoiceGenerator } from "./InvoiceGenerator"
 import { type Inquiry } from "./types"
+import { InquiryChat } from "./InquiryChat"
+import { Badge } from "@/components/ui/badge"
+import { format } from "date-fns"
 
 type ActiveInquiriesProps = {
   inquiries: Inquiry[]
   type: "buying" | "selling"
+  loading?: boolean
 }
 
-export const ActiveInquiries = ({ inquiries, type }: ActiveInquiriesProps) => {
-  const filteredInquiries = inquiries.filter(inquiry => inquiry.type === type)
+export const ActiveInquiries = ({ inquiries, type, loading = false }: ActiveInquiriesProps) => {
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">
+          {type === "buying" ? "Aktivne Nabavke" : "Potencijalne Prodaje"}
+        </h2>
+        <div className="space-y-4">
+          <div className="animate-pulse">
+            <div className="h-20 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="h-20 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="h-20 bg-gray-200 rounded-lg"></div>
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  if (!inquiries.length) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">
+          {type === "buying" ? "Aktivne Nabavke" : "Potencijalne Prodaje"}
+        </h2>
+        <p className="text-gray-500 text-center py-8">
+          {type === "buying" 
+            ? "Nemate aktivnih upita za nabavku" 
+            : "Trenutno nema upita koji odgovaraju vašim kategorijama proizvoda"}
+        </p>
+      </Card>
+    )
+  }
 
   return (
     <Card className="p-6">
       <h2 className="text-2xl font-bold mb-4">
-        {type === "buying" ? "Aktivni Upiti za Nabavku" : "Aktivni upiti za robu"}
+        {type === "buying" ? "Aktivne Nabavke" : "Potencijalne Prodaje"}
       </h2>
       <div className="space-y-4">
-        {filteredInquiries.map((inquiry) => (
+        {inquiries.map((inquiry) => (
           <Card key={inquiry.id} className="p-4">
             <div className="flex justify-between items-start">
-              <div>
+              <div className="space-y-2">
                 <h3 className="font-semibold">{inquiry.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Datum: {new Date(inquiry.created_at).toLocaleDateString('sr-RS', {
-                    day: 'numeric',
-                    month: 'numeric',
-                    year: 'numeric'
-                  })}
+                <p className="text-sm text-gray-600">{inquiry.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {inquiry.tags?.map((tag) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">
+                  {format(new Date(inquiry.created_at), "dd.MM.yyyy.")}
                 </p>
-                {inquiry.tags && inquiry.tags.length > 0 && (
-                  <div className="flex gap-2 mt-2">
-                    {inquiry.tags.map((tag, i) => (
-                      <span key={i} className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
-              <span className={`px-3 py-1 rounded-full text-sm ${
-                type === "buying" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
-              }`}>
-                {inquiry.status}
-              </span>
-            </div>
-            <div className="mt-4 flex gap-2">
               <InquiryChat
                 inquiryId={inquiry.id}
                 inquiryTitle={inquiry.title}
                 onClose={() => {}}
               />
-              {type === "selling" && (
-                <InvoiceGenerator
-                  inquiryId={inquiry.id}
-                  inquiryTitle={inquiry.title}
-                  onClose={() => {}}
-                />
-              )}
             </div>
           </Card>
         ))}
