@@ -1,6 +1,7 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChatMessage } from "../ChatMessage"
 import { type Message } from "../types"
+import { useEffect, useRef } from "react"
 
 type ChatMessageListProps = {
   messages: Message[]
@@ -15,6 +16,14 @@ export const ChatMessageList = ({
   onSelectSeller, 
   onMarkAsRead 
 }: ChatMessageListProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [messages]) // Scroll whenever messages change
+
   return (
     <ScrollArea className="flex-grow p-4">
       <div className="space-y-4">
@@ -27,6 +36,7 @@ export const ChatMessageList = ({
             onMarkAsRead={() => onMarkAsRead(message.id)}
           />
         ))}
+        <div ref={scrollRef} /> {/* Invisible element at the bottom for scrolling */}
       </div>
     </ScrollArea>
   )
