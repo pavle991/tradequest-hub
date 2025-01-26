@@ -46,7 +46,7 @@ const Dashboard = () => {
         return
       }
 
-      setInquiries(data || [])
+      setInquiries(data as Inquiry[])
     } catch (error) {
       console.error('Error:', error)
       toast({
@@ -63,9 +63,11 @@ const Dashboard = () => {
       title,
       description,
       status: "aktivan",
-      date: new Date().toISOString().split('T')[0],
       type,
-      tags
+      tags,
+      user_id: "", // This will be set by the backend
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
     
     setInquiries(prev => [newInquiry, ...prev])
