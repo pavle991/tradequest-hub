@@ -24,6 +24,12 @@ export const OfferForm = ({ inquiryId, onOfferSubmitted, onCancel }: OfferFormPr
       return
     }
 
+    const numericPrice = parseFloat(price)
+    if (isNaN(numericPrice) || numericPrice <= 0) {
+      toast.error("Molimo vas unesite validnu cenu")
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -36,21 +42,25 @@ export const OfferForm = ({ inquiryId, onOfferSubmitted, onCancel }: OfferFormPr
 
       const { error } = await supabase
         .from('offers')
-        .insert({
+        .insert([{
           inquiry_id: inquiryId,
           seller_id: user.id,
-          price: parseFloat(price),
+          price: numericPrice,
           currency: "RSD",
           description,
-        })
+          status: "pending"
+        }])
 
-      if (error) throw error
+      if (error) {
+        console.error('Offer submission error:', error)
+        throw error
+      }
 
       toast.success("Ponuda je uspešno poslata")
       onOfferSubmitted()
     } catch (error) {
       console.error('Error submitting offer:', error)
-      toast.error("Došlo je do greške prilikom slanja ponude")
+      toast.error("Došlo je do greške prilikom slanja ponude. Molimo pokušajte ponovo.")
     } finally {
       setIsSubmitting(false)
     }
@@ -64,6 +74,8 @@ export const OfferForm = ({ inquiryId, onOfferSubmitted, onCancel }: OfferFormPr
           placeholder="Cena (RSD)"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          min="0"
+          step="0.01"
         />
       </div>
       <div>
@@ -84,7 +96,7 @@ export const OfferForm = ({ inquiryId, onOfferSubmitted, onCancel }: OfferFormPr
           Odustani
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          Pošalji ponudu
+          {isSubmitting ? "Slanje..." : "Pošalji ponudu"}
         </Button>
       </div>
     </form>
