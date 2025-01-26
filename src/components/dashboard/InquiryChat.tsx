@@ -15,14 +15,17 @@ import { type Message } from "./types"
 type InquiryChatProps = {
   inquiryId: string
   inquiryTitle: string
+  offerId?: string
   onClose: () => void
 }
 
-export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatProps) => {
+export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: InquiryChatProps) => {
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
   const [userId, setUserId] = useState<string | null>(null)
+  const [offer, setOffer] = useState<any>(null)
+  const [isBuyer, setIsBuyer] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -30,9 +33,23 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUserId(user.id)
+        
+        // Proveri da li je trenutni korisnik kupac
+        const { data: inquiry } = await supabase
+          .from('inquiries')
+          .select('user_id')
+          .eq('id', inquiryId)
+          .single()
+        
+        setIsBuyer(inquiry?.user_id === user.id)
       }
     }
     getCurrentUser()
+
+    // Učitaj ponudu ako postoji offerId
+    if (offerId) {
+      fetchOffer()
+    }
 
     const channel = supabase
       .channel('schema-db-changes')
@@ -72,6 +89,23 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
       supabase.removeChannel(channel)
     }
   }, [inquiryId, userId])
+
+  const fetchOffer = async () => {
+    if (!offerId) return
+    
+    try {
+      const { data, error } = await supabase
+        .from('offers')
+        .select('*')
+        .eq('id', offerId)
+        .single()
+
+      if (error) throw error
+      setOffer(data)
+    } catch (error) {
+      console.error('Error fetching offer:', error)
+    }
+  }
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !userId) return
@@ -121,8 +155,7 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
       <DialogContent className="sm:max-w-[500px]">
         <ChatHeader 
           title={inquiryTitle}
-          selectedSeller={selectedSeller}
-          messages={messages}
+          offer={offer}
         />
         <div className="flex flex-col h-[500px]">
           <ChatMessageList

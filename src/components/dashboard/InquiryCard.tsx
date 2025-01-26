@@ -27,7 +27,6 @@ export const InquiryCard = ({
   const [showChat, setShowChat] = useState(false)
   const [hasExistingOffer, setHasExistingOffer] = useState(false)
 
-  // Check if the current seller has already made an offer
   const checkExistingOffer = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -45,7 +44,6 @@ export const InquiryCard = ({
     }
   }
 
-  // Call checkExistingOffer when component mounts
   useEffect(() => {
     if (type === "selling") {
       checkExistingOffer()
@@ -68,21 +66,7 @@ export const InquiryCard = ({
         </div>
         {type === "selling" ? (
           <div className="flex flex-col gap-2">
-            {hasExistingOffer ? (
-              <>
-                {showChat ? (
-                  <InquiryChat
-                    inquiryId={inquiry.id}
-                    inquiryTitle={inquiry.title}
-                    onClose={() => setShowChat(false)}
-                  />
-                ) : (
-                  <Button onClick={() => setShowChat(true)}>
-                    Otvori chat
-                  </Button>
-                )}
-              </>
-            ) : (
+            {!hasExistingOffer && (
               <Button onClick={() => onOpenOfferForm(inquiry.id)}>
                 Pošalji ponudu
               </Button>

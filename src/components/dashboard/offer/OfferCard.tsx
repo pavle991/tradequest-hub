@@ -53,6 +53,7 @@ export const OfferCard = ({
               <InquiryChat
                 inquiryId={inquiryId}
                 inquiryTitle={inquiryTitle}
+                offerId={offer.id}
                 onClose={() => onSelectOffer("")}
               />
             ) : (
