@@ -12,7 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 
 type InvoiceGeneratorProps = {
-  inquiryId: number
+  inquiryId: string
   inquiryTitle: string
   onClose: () => void
 }
