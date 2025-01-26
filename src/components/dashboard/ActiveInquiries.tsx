@@ -24,7 +24,11 @@ export const ActiveInquiries = ({ inquiries, type }: ActiveInquiriesProps) => {
                 <h3 className="font-semibold">{inquiry.title}</h3>
                 <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Datum: {new Date(inquiry.created_at).toLocaleDateString('sr-RS')}
+                  Datum: {new Date(inquiry.created_at).toLocaleDateString('sr-RS', {
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric'
+                  })}
                 </p>
                 {inquiry.tags && inquiry.tags.length > 0 && (
                   <div className="flex gap-2 mt-2">
