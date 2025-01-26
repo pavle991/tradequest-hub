@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { OfferList } from "./OfferList"
-import { InquiryChat } from "./InquiryChat"
 import { type Inquiry } from "./types"
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
+import { SellerActions } from "./SellerActions"
+import { BuyerActions } from "./BuyerActions"
 
 type InquiryCardProps = {
   inquiry: Inquiry
@@ -24,7 +24,6 @@ export const InquiryCard = ({
   onToggleOffers,
   onOpenOfferForm
 }: InquiryCardProps) => {
-  const [showChat, setShowChat] = useState(false)
   const [hasExistingOffer, setHasExistingOffer] = useState(false)
   const [offerId, setOfferId] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
@@ -85,7 +84,6 @@ export const InquiryCard = ({
     }
     checkUnreadMessages()
 
-    // Subscribe to new messages
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -122,62 +120,24 @@ export const InquiryCard = ({
           </div>
         </div>
         {type === "selling" ? (
-          <div className="flex flex-col gap-2">
-            {!hasExistingOffer ? (
-              <Button onClick={() => onOpenOfferForm(inquiry.id)}>
-                Pošalji ponudu
-              </Button>
-            ) : (
-              <div className="flex flex-col items-end gap-2">
-                {unreadCount > 0 && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleClearUnread}
-                    className="flex gap-2 items-center"
-                  >
-                    <Badge variant="destructive">
-                      {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
-                    </Badge>
-                  </Button>
-                )}
-                <InquiryChat
-                  inquiryId={inquiry.id}
-                  inquiryTitle={inquiry.title}
-                  offerId={offerId}
-                  onClose={() => setShowChat(false)}
-                />
-              </div>
-            )}
-          </div>
+          <SellerActions
+            inquiryId={inquiry.id}
+            inquiryTitle={inquiry.title}
+            hasExistingOffer={hasExistingOffer}
+            offerId={offerId}
+            unreadCount={unreadCount}
+            onOpenOfferForm={onOpenOfferForm}
+            onClearUnread={handleClearUnread}
+          />
         ) : (
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-2">
-              {offersCount && offersCount > 0 && (
-                <Badge variant="secondary">
-                  {offersCount} {offersCount === 1 ? 'ponuda' : 'ponuda'}
-                </Badge>
-              )}
-              {unreadCount > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleClearUnread}
-                  className="flex gap-2 items-center"
-                >
-                  <Badge variant="destructive">
-                    {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
-                  </Badge>
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                onClick={() => onToggleOffers(inquiry.id)}
-              >
-                {selectedInquiryId === inquiry.id ? 'Zatvori ponude' : 'Pogledaj ponude'}
-              </Button>
-            </div>
-          </div>
+          <BuyerActions
+            inquiryId={inquiry.id}
+            offersCount={offersCount}
+            unreadCount={unreadCount}
+            selectedInquiryId={selectedInquiryId}
+            onToggleOffers={onToggleOffers}
+            onClearUnread={handleClearUnread}
+          />
         )}
       </div>
 
