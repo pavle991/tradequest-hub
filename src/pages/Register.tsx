@@ -1,190 +1,109 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { useState } from "react";
-import { BasicInfoForm } from "@/components/register/BasicInfoForm";
-import { AddressForm } from "@/components/register/AddressForm";
-import { ContactForm } from "@/components/register/ContactForm";
-import { SocialMediaForm } from "@/components/register/SocialMediaForm";
-import { PreferencesForm } from "@/components/register/PreferencesForm";
-import { DescriptionForm } from "@/components/register/DescriptionForm";
-import { PasswordForm } from "@/components/register/PasswordForm";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-
-const urlRegex = /^(https?:\/\/|www\.)[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+([\/\w-]*)*\/?$/;
-
-const formSchema = z.object({
-  companyName: z.string().min(2, "Naziv firme mora imati najmanje 2 karaktera"),
-  email: z.string().email("Unesite validnu email adresu"),
-  password: z.string().min(6, "Lozinka mora imati najmanje 6 karaktera"),
-  confirmPassword: z.string(),
-  pib: z.string().optional(),
-  phone: z.string().optional(),
-  description: z.string().min(10, "Opis mora imati najmanje 10 karaktera"),
-  companyNumber: z.string().optional(),
-  foundingYear: z.string().optional(),
-  website: z.string()
-    .regex(urlRegex, "Unesite validnu web adresu (može početi sa www. ili http://)")
-    .optional()
-    .or(z.literal("")),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  postalCode: z.string().optional(),
-  region: z.string().optional(),
-  contactName: z.string().optional(),
-  contactPosition: z.string().optional(),
-  workingHours: z.string().optional(),
-  linkedin: z.string().optional(),
-  facebook: z.string().optional(),
-  instagram: z.string().optional(),
-  preferredCommunication: z.enum(["email", "phone", "chat"]).optional(),
-  communicationLanguage: z.enum(["sr", "en"]).optional(),
-  currency: z.enum(["RSD", "EUR", "USD"]).optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Lozinke se ne poklapaju",
-  path: ["confirmPassword"],
-});
+import { Navbar } from "@/components/layout/Navbar";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [tags, setTags] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      companyName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      pib: "",
-      phone: "",
-      description: "",
-      companyNumber: "",
-      foundingYear: "",
-      website: "",
-      address: "",
-      city: "",
-      postalCode: "",
-      region: "",
-      contactName: "",
-      contactPosition: "",
-      workingHours: "",
-      linkedin: "",
-      facebook: "",
-      instagram: "",
-      preferredCommunication: "email",
-      communicationLanguage: "sr",
-      currency: "RSD",
-    },
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      setIsLoading(true);
-      console.log("Starting registration process...");
-      
-      // Register user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
       });
 
-      console.log("Auth response:", { authData, authError });
-
-      if (authError) {
-        console.error("Auth error:", authError);
-        toast.error(authError.message);
-        return;
-      }
-
-      if (!authData.user) {
-        console.error("No user data returned");
-        toast.error("Registracija nije uspela");
-        return;
-      }
-
-      console.log("User registered successfully, updating profile...");
-
-      // Update profile information
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          company_name: values.companyName,
-          company_number: values.companyNumber,
-          pib: values.pib,
-          founding_year: values.foundingYear ? parseInt(values.foundingYear) : null,
-          website: values.website,
-          description: values.description,
-          contact_name: values.contactName,
-          contact_position: values.contactPosition,
-          phone: values.phone,
-          working_hours: values.workingHours,
-          address: values.address,
-          city: values.city,
-          postal_code: values.postalCode,
-          region: values.region,
-          linkedin: values.linkedin,
-          facebook: values.facebook,
-          instagram: values.instagram,
-          preferred_communication: values.preferredCommunication,
-          communication_language: values.communicationLanguage,
-          currency: values.currency,
-        })
-        .eq('id', authData.user.id);
-
-      console.log("Profile update response:", { profileError });
-
-      if (profileError) {
-        console.error('Profile update error:', profileError);
-        toast.error("Greška pri ažuriranju profila");
-        return;
-      }
-
-      console.log("Registration completed successfully");
-      toast.success("Uspešno ste se registrovali! Možete se prijaviti.");
+      if (error) throw error;
+      
+      toast.success("Uspešno ste se registrovali. Proverite email za verifikaciju.");
       navigate("/login");
     } catch (error: any) {
-      console.error('Registration error:', error);
       toast.error(error.message || "Došlo je do greške prilikom registracije");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Registracija</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <BasicInfoForm form={form} />
-              <AddressForm form={form} />
-              <ContactForm form={form} />
-              <SocialMediaForm form={form} />
-              <PreferencesForm form={form} />
-              <DescriptionForm 
-                form={form}
-                tags={tags}
-                setTags={setTags}
-                handleFileImport={() => {}}
-              />
-              <PasswordForm form={form} />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Registracija u toku..." : "Registruj se"}
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Registracija na platformu
+            </h2>
+          </div>
+          <form className="mt-8 space-y-6" onSubmit={handleRegister}>
+            <div className="rounded-md shadow-sm space-y-4">
+              <div>
+                <label htmlFor="companyName" className="sr-only">
+                  Naziv firme
+                </label>
+                <Input
+                  id="companyName"
+                  name="companyName"
+                  type="text"
+                  required
+                  placeholder="Naziv firme"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="sr-only">
+                  Email adresa
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="Email adresa"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Lozinka
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  placeholder="Lozinka"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? "Učitavanje..." : "Registruj se"}
               </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };
