@@ -44,11 +44,6 @@ export const InvoiceGenerator = ({
   } = useInvoiceItems()
 
   const { loading, generateInvoice } = useInvoiceGeneration(inquiryId, offerId, () => {
-    setInvoiceData({
-      buyerName: "",
-      buyerAddress: "",
-      dueDate: "",
-    })
     setOpen(false)
     onClose()
   })
