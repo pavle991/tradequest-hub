@@ -88,6 +88,8 @@ export const InvoiceGenerator = ({
   }
 
   const validateForm = () => {
+    console.log("Validating form data:", { invoiceData, items })
+    
     if (!invoiceData.buyerName.trim()) {
       toast({
         title: "Greška",
@@ -139,9 +141,12 @@ export const InvoiceGenerator = ({
     try {
       setLoading(true)
       console.log("Starting invoice generation process...")
+      console.log("Inquiry ID:", inquiryId)
+      console.log("Offer ID:", offerId)
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
+        console.error("No authenticated user found")
         toast({
           title: "Greška",
           description: "Niste prijavljeni",
@@ -150,10 +155,14 @@ export const InvoiceGenerator = ({
         return
       }
 
+      console.log("Authenticated user:", user.id)
       console.log("Creating invoice with data:", {
         inquiry_id: inquiryId,
         offer_id: offerId,
         seller_id: user.id,
+        buyer_name: invoiceData.buyerName,
+        buyer_address: invoiceData.buyerAddress,
+        due_date: invoiceData.dueDate,
         total_amount: calculateTotalAmount(),
         vat_amount: calculateVatAmount(),
       })
@@ -169,6 +178,7 @@ export const InvoiceGenerator = ({
           total_amount: calculateTotalAmount(),
           vat_amount: calculateVatAmount(),
           total_with_vat: calculateTotalAmount() + calculateVatAmount(),
+          status: 'pending'
         })
         .select()
         .single()
@@ -206,6 +216,8 @@ export const InvoiceGenerator = ({
         amount: calculateItemAmount(item),
         vat_rate: item.vatRate,
       }))
+
+      console.log("Invoice items to create:", invoiceItems)
 
       const { error: itemsError } = await supabase
         .from('invoice_items')
