@@ -156,6 +156,7 @@ export const InvoiceGenerator = ({
         return
       }
 
+      // First create the invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
@@ -171,8 +172,26 @@ export const InvoiceGenerator = ({
         .select()
         .single()
 
-      if (invoiceError) throw invoiceError
+      if (invoiceError) {
+        console.error('Error creating invoice:', invoiceError)
+        toast({
+          title: "Greška",
+          description: "Došlo je do greške prilikom kreiranja fakture",
+          variant: "destructive",
+        })
+        return
+      }
 
+      if (!invoice) {
+        toast({
+          title: "Greška",
+          description: "Faktura nije kreirana",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Then create invoice items
       const invoiceItems = items.map(item => ({
         invoice_id: invoice.id,
         description: item.description,
@@ -188,12 +207,36 @@ export const InvoiceGenerator = ({
         .from('invoice_items')
         .insert(invoiceItems)
 
-      if (itemsError) throw itemsError
+      if (itemsError) {
+        console.error('Error creating invoice items:', itemsError)
+        toast({
+          title: "Greška",
+          description: "Došlo je do greške prilikom čuvanja stavki fakture",
+          variant: "destructive",
+        })
+        return
+      }
 
+      // If we got here, everything was successful
       toast({
         title: "Uspešno",
         description: "Faktura je uspešno generisana",
       })
+      
+      // Reset form and close dialog
+      setInvoiceData({
+        buyerName: "",
+        buyerAddress: "",
+        dueDate: "",
+      })
+      setItems([{
+        description: "",
+        quantity: 1,
+        unitPrice: 0,
+        unit: "kom",
+        discount: 0,
+        vatRate: 20
+      }])
       setOpen(false)
       onClose()
     } catch (error) {
