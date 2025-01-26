@@ -53,6 +53,133 @@ export type Database = {
           },
         ]
       }
+      invoice_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          discount: number
+          id: string
+          invoice_id: string | null
+          quantity: number
+          unit: string
+          unit_price: number
+          vat_rate: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          discount?: number
+          id?: string
+          invoice_id?: string | null
+          quantity: number
+          unit?: string
+          unit_price: number
+          vat_rate?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          discount?: number
+          id?: string
+          invoice_id?: string | null
+          quantity?: number
+          unit?: string
+          unit_price?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          buyer_id: string | null
+          created_at: string
+          due_date: string
+          id: string
+          inquiry_id: string | null
+          invoice_date: string
+          invoice_number: string
+          offer_id: string | null
+          seller_id: string | null
+          status: string
+          total_amount: number
+          total_with_vat: number
+          updated_at: string
+          vat_amount: number
+        }
+        Insert: {
+          buyer_id?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          inquiry_id?: string | null
+          invoice_date?: string
+          invoice_number: string
+          offer_id?: string | null
+          seller_id?: string | null
+          status?: string
+          total_amount: number
+          total_with_vat: number
+          updated_at?: string
+          vat_amount: number
+        }
+        Update: {
+          buyer_id?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          inquiry_id?: string | null
+          invoice_date?: string
+          invoice_number?: string
+          offer_id?: string | null
+          seller_id?: string | null
+          status?: string
+          total_amount?: number
+          total_with_vat?: number
+          updated_at?: string
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
