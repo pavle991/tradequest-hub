@@ -16,11 +16,11 @@ import { SellerRating } from "./SellerRating"
 import { supabase } from "@/integrations/supabase/client"
 
 type Message = {
-  id: number
+  id: string
   sender: string
   content: string
   timestamp: string
-  sellerId?: number
+  sellerId?: string
   sellerRating?: number
   totalSales?: number
   numberOfRatings?: number
@@ -28,18 +28,28 @@ type Message = {
 }
 
 type InquiryChatProps = {
-  inquiryId: number
+  inquiryId: string
   inquiryTitle: string
   onClose: () => void
 }
 
 export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatProps) => {
   const [messages, setMessages] = useState<Message[]>([])
-  const [selectedSeller, setSelectedSeller] = useState<number | null>(null)
+  const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
+  const [userId, setUserId] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
+    // Get current user
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      }
+    }
+    getCurrentUser()
+
     // Subscribe to real-time updates
     const channel = supabase
       .channel('schema-db-changes')
@@ -56,7 +66,7 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
             const newMessage = payload.new
             setMessages(prev => [...prev, {
               id: newMessage.id,
-              sender: newMessage.sender_id === supabase.auth.user()?.id ? 'Kupac' : 'Prodavac',
+              sender: newMessage.sender_id === userId ? 'Kupac' : 'Prodavac',
               content: newMessage.content,
               timestamp: new Date(newMessage.created_at).toLocaleTimeString('sr-RS', { 
                 hour: '2-digit', 
@@ -78,17 +88,17 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [inquiryId])
+  }, [inquiryId, userId])
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return
+    if (!newMessage.trim() || !userId) return
     
     try {
       const { data, error } = await supabase
         .from('messages')
         .insert({
           inquiry_id: inquiryId,
-          sender_id: supabase.auth.user()?.id,
+          sender_id: userId,
           content: newMessage,
           status: 'delivered'
         })
@@ -105,7 +115,7 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
     }
   }
 
-  const handleMarkAsRead = async (messageId: number) => {
+  const handleMarkAsRead = async (messageId: string) => {
     try {
       const { error } = await supabase
         .from('messages')

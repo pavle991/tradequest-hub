@@ -1,16 +1,17 @@
 export type Message = {
-  id: number
+  id: string
   sender: string
   content: string
   timestamp: string
-  sellerId?: number
+  sellerId?: string
   sellerRating?: number
   totalSales?: number
   numberOfRatings?: number
+  status?: 'delivered' | 'read'
 }
 
 export type Deal = {
-  id: number
+  id: string
   seller: string
   title: string
   date: string
@@ -18,7 +19,7 @@ export type Deal = {
 }
 
 export type Inquiry = {
-  id: number
+  id: string
   title: string
   description: string
   status: string
