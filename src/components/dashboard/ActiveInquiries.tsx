@@ -24,16 +24,12 @@ export const ActiveInquiries = ({ inquiries, type }: ActiveInquiriesProps) => {
                 <h3 className="font-semibold">{inquiry.title}</h3>
                 <p className="text-sm text-gray-600 mt-1">{inquiry.description}</p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Datum: {new Date(inquiry.created_at).toLocaleString('sr-RS', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                  })}
+                  Datum: {new Date(inquiry.created_at).toLocaleDateString('sr-RS')}
                 </p>
-                {inquiry.tags.length > 0 && (
+                {inquiry.tags && inquiry.tags.length > 0 && (
                   <div className="flex gap-2 mt-2">
-                    {inquiry.tags.map((tag) => (
-                      <span key={tag} className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                    {inquiry.tags.map((tag, index) => (
+                      <span key={index} className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
                         {tag}
                       </span>
                     ))}
