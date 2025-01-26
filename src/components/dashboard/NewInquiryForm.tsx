@@ -1,12 +1,10 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { FormFields } from "./inquiry-form/FormFields"
+import { TagInput } from "./inquiry-form/TagInput"
 
 type NewInquiryFormProps = {
   onSubmit: (title: string, description: string, type: "buying" | "selling", tags: string[]) => void
@@ -17,14 +15,10 @@ export const NewInquiryForm = ({ onSubmit, type }: NewInquiryFormProps) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [tags, setTags] = useState<string[]>([])
-  const [newTag, setNewTag] = useState("")
   const { toast } = useToast()
 
-  const handleAddTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      setTags([...tags, newTag])
-      setNewTag("")
-    }
+  const handleAddTag = (newTag: string) => {
+    setTags([...tags, newTag])
   }
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -62,7 +56,7 @@ export const NewInquiryForm = ({ onSubmit, type }: NewInquiryFormProps) => {
           type,
           tags,
           user_id: user.id,
-          status: 'active' // Changed from 'aktivan' to 'active' to match database constraint
+          status: 'active'
         })
         .select()
         .single()
@@ -102,46 +96,18 @@ export const NewInquiryForm = ({ onSubmit, type }: NewInquiryFormProps) => {
         {type === "buying" ? "Novi Upit za Nabavku" : "Novi Prodajni Oglas"}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Naslov</label>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={type === "buying" ? "Unesite naslov upita" : "Unesite naslov oglasa"}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Opis</label>
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={type === "buying" ? "Detaljno opišite šta vam je potrebno" : "Detaljno opišite šta prodajete"}
-            rows={4}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Tagovi</label>
-          <div className="flex gap-2 mb-2">
-            <Input
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              placeholder="Dodaj novi tag"
-              onKeyPress={(e) => e.key === "Enter" && handleAddTag()}
-            />
-            <Button type="button" onClick={handleAddTag}>Dodaj</Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                {tag}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => handleRemoveTag(tag)}
-                />
-              </Badge>
-            ))}
-          </div>
-        </div>
+        <FormFields
+          title={title}
+          description={description}
+          onTitleChange={setTitle}
+          onDescriptionChange={setDescription}
+          type={type}
+        />
+        <TagInput
+          tags={tags}
+          onAddTag={handleAddTag}
+          onRemoveTag={handleRemoveTag}
+        />
         <Button type="submit" className="w-full">
           {type === "buying" ? "Pošalji Upit za Nabavku" : "Objavi Prodajni Oglas"}
         </Button>
