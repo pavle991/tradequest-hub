@@ -55,7 +55,7 @@ export const RatingDialog = ({
 
   const calculateAverageRating = () => {
     const sum = parameters.reduce((acc, param) => acc + param.value, 0)
-    return sum / parameters.length
+    return Number((sum / parameters.length).toFixed(2))
   }
 
   const handleSubmit = async () => {
@@ -73,6 +73,22 @@ export const RatingDialog = ({
       
       const averageRating = calculateAverageRating()
       
+      // First verify that the invoice exists and is verified
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .select('status')
+        .eq('id', invoiceId)
+        .eq('buyer_id', buyerId)
+        .single()
+
+      if (invoiceError) {
+        throw new Error('Nije moguće pronaći fakturu')
+      }
+
+      if (invoice.status !== 'verified') {
+        throw new Error('Faktura mora biti verifikovana pre ocenjivanja')
+      }
+
       const { error: ratingError } = await supabase
         .from('ratings')
         .insert({
@@ -96,7 +112,7 @@ export const RatingDialog = ({
       console.error('Error submitting rating:', error)
       toast({
         title: "Greška",
-        description: "Došlo je do greške prilikom dodavanja ocene",
+        description: error instanceof Error ? error.message : "Došlo je do greške prilikom dodavanja ocene",
         variant: "destructive",
       })
     } finally {
