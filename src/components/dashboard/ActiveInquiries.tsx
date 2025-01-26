@@ -44,6 +44,10 @@ export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesPro
     }
   }
 
+  const toggleOffers = (inquiryId: string) => {
+    setSelectedInquiryId(selectedInquiryId === inquiryId ? null : inquiryId)
+  }
+
   if (loading) {
     return <div>Učitavanje upita...</div>
   }
@@ -99,9 +103,9 @@ export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesPro
                   )}
                   <Button
                     variant="outline"
-                    onClick={() => setSelectedInquiryId(inquiry.id)}
+                    onClick={() => toggleOffers(inquiry.id)}
                   >
-                    Pogledaj ponude
+                    {selectedInquiryId === inquiry.id ? 'Zatvori ponude' : 'Pogledaj ponude'}
                   </Button>
                 </div>
               </div>
