@@ -106,10 +106,11 @@ const Register = () => {
         return;
       }
 
-      // Update profile information
+      // Update profile information immediately after registration
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: authData.user.id,
           company_name: values.companyName,
           company_number: values.companyNumber,
           pib: values.pib,
@@ -131,8 +132,7 @@ const Register = () => {
           communication_language: values.communicationLanguage,
           currency: values.currency,
           tags: tags,
-        })
-        .eq('id', authData.user.id);
+        });
 
       if (profileError) {
         console.error('Profile update error:', profileError);
