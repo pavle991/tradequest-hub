@@ -309,6 +309,7 @@ export type Database = {
           id: string
           instagram: string | null
           linkedin: string | null
+          logo_url: string | null
           phone: string | null
           pib: string | null
           postal_code: string | null
@@ -335,6 +336,7 @@ export type Database = {
           id: string
           instagram?: string | null
           linkedin?: string | null
+          logo_url?: string | null
           phone?: string | null
           pib?: string | null
           postal_code?: string | null
@@ -361,6 +363,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           linkedin?: string | null
+          logo_url?: string | null
           phone?: string | null
           pib?: string | null
           postal_code?: string | null

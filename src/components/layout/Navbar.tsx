@@ -35,7 +35,7 @@ export const Navbar = () => {
       .from('profiles')
       .select('company_name')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (!error && data) {
       setCompanyName(data.company_name);
@@ -54,7 +54,7 @@ export const Navbar = () => {
           </div>
           <div className="flex items-center space-x-4">
             {user && companyName && (
-              <span className="text-gray-700 font-medium hidden md:block">{companyName}</span>
+              <span className="text-gray-700 font-medium">{companyName}</span>
             )}
             {!user ? <AuthButtons /> : <UserMenu />}
           </div>
