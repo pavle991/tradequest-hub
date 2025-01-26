@@ -373,6 +373,58 @@ export type Database = {
         }
         Relationships: []
       }
+      ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          invoice_id: string
+          rated_id: string
+          rater_id: string
+          rating: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          invoice_id: string
+          rated_id: string
+          rater_id: string
+          rating: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          rated_id?: string
+          rater_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rated_id_fkey"
+            columns: ["rated_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rater_id_fkey"
+            columns: ["rater_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

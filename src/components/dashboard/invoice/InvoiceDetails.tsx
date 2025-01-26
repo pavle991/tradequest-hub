@@ -1,6 +1,10 @@
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { RatingDialog } from "../ratings/RatingDialog"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 
 type InvoiceDetailsProps = {
   invoice: any
@@ -13,8 +17,37 @@ export const InvoiceDetails = ({
   invoiceItems,
   onVerify 
 }: InvoiceDetailsProps) => {
+  const [showRating, setShowRating] = useState(false)
+  const { toast } = useToast()
+
   if (!invoice) {
     return <p>Nema dostupne fakture za ovaj upit.</p>
+  }
+
+  const handleVerify = async () => {
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'verified' })
+        .eq('id', invoice.id)
+
+      if (error) throw error
+
+      onVerify()
+      setShowRating(true)
+      
+      toast({
+        title: "Uspešno",
+        description: "Faktura je verifikovana",
+      })
+    } catch (error) {
+      console.error('Error verifying invoice:', error)
+      toast({
+        title: "Greška",
+        description: "Došlo je do greške prilikom verifikacije fakture",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -53,7 +86,7 @@ export const InvoiceDetails = ({
       {invoice.status === 'pending' && (
         <Button 
           className="w-full" 
-          onClick={onVerify}
+          onClick={handleVerify}
         >
           Verifikuj fakturu
         </Button>
@@ -63,6 +96,20 @@ export const InvoiceDetails = ({
           Faktura je verifikovana
         </Badge>
       )}
+
+      <RatingDialog
+        open={showRating}
+        onOpenChange={setShowRating}
+        invoiceId={invoice.id}
+        sellerId={invoice.seller_id}
+        buyerId={invoice.buyer_id}
+        onRatingSubmitted={() => {
+          toast({
+            title: "Uspešno",
+            description: "Hvala vam na oceni!",
+          })
+        }}
+      />
     </div>
   )
 }
