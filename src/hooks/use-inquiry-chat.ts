@@ -65,6 +65,14 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
             }
 
             setMessages(prev => [...prev, formattedMessage])
+
+            // Mark message as read if the recipient is viewing the chat
+            if (newMessage.sender_id !== userId) {
+              await supabase
+                .from('messages')
+                .update({ status: 'read' })
+                .eq('id', newMessage.id)
+            }
           } else if (payload.eventType === 'UPDATE') {
             setMessages(prev => prev.map(msg => 
               msg.id === payload.new.id 
@@ -112,6 +120,18 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
           status: msg.status as 'delivered' | 'read'
         }))
         setMessages(formattedMessages)
+
+        // Mark all unread messages as read when loading the chat
+        const unreadMessages = existingMessages.filter(
+          msg => msg.status === 'delivered' && msg.sender_id !== userId
+        )
+        
+        if (unreadMessages.length > 0) {
+          await supabase
+            .from('messages')
+            .update({ status: 'read' })
+            .in('id', unreadMessages.map(msg => msg.id))
+        }
       }
     } catch (error) {
       console.error('Error loading messages:', error)

@@ -54,15 +54,14 @@ export const InquiryCard = ({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: messages, error } = await supabase
+      const { data: messages } = await supabase
         .from('messages')
         .select('*')
         .eq('inquiry_id', inquiry.id)
         .eq('status', 'delivered')
         .neq('sender_id', user.id)
+        .is('offer_id', type === 'selling' ? offerId : null)
 
-      if (error) throw error
-      
       setUnreadCount(messages?.length || 0)
     } catch (error) {
       console.error('Error checking unread messages:', error)
@@ -75,7 +74,7 @@ export const InquiryCard = ({
     }
     checkUnreadMessages()
 
-    // Subscribe to new messages
+    // Subscribe to new messages and status changes
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -86,8 +85,15 @@ export const InquiryCard = ({
           table: 'messages',
           filter: `inquiry_id=eq.${inquiry.id}`
         },
-        () => {
-          checkUnreadMessages()
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const { data: { user } } = supabase.auth.getUser()
+            if (user && payload.new.sender_id !== user.id) {
+              setUnreadCount(prev => prev + 1)
+            }
+          } else if (payload.eventType === 'UPDATE' && payload.new.status === 'read') {
+            checkUnreadMessages()
+          }
         }
       )
       .subscribe()
@@ -95,7 +101,7 @@ export const InquiryCard = ({
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [inquiry.id, type])
+  }, [inquiry.id, type, offerId])
 
   return (
     <Card key={inquiry.id} className="p-6">
