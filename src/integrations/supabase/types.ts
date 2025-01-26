@@ -102,9 +102,12 @@ export type Database = {
           description: string
           id: string
           inquiry_id: string
+          number_of_ratings: number | null
           price: number
           seller_id: string
+          seller_rating: number | null
           status: string
+          total_sales: number | null
           updated_at: string
         }
         Insert: {
@@ -113,9 +116,12 @@ export type Database = {
           description: string
           id?: string
           inquiry_id: string
+          number_of_ratings?: number | null
           price: number
           seller_id: string
+          seller_rating?: number | null
           status?: string
+          total_sales?: number | null
           updated_at?: string
         }
         Update: {
@@ -124,9 +130,12 @@ export type Database = {
           description?: string
           id?: string
           inquiry_id?: string
+          number_of_ratings?: number | null
           price?: number
           seller_id?: string
+          seller_rating?: number | null
           status?: string
+          total_sales?: number | null
           updated_at?: string
         }
         Relationships: [

@@ -1,80 +1,112 @@
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
-import { type Inquiry } from "./types"
-import { InquiryChat } from "./InquiryChat"
 import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { OfferForm } from "./OfferForm"
+import { OfferList } from "./OfferList"
+import { type Inquiry } from "./types"
 
 type ActiveInquiriesProps = {
   inquiries: Inquiry[]
   type: "buying" | "selling"
-  loading?: boolean
+  loading: boolean
 }
 
-export const ActiveInquiries = ({ inquiries, type, loading = false }: ActiveInquiriesProps) => {
+export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesProps) => {
+  const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null)
+  const [showOfferForm, setShowOfferForm] = useState(false)
+
   if (loading) {
-    return (
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">
-          {type === "buying" ? "Aktivne Nabavke" : "Potencijalne Prodaje"}
-        </h2>
-        <div className="space-y-4">
-          <div className="animate-pulse">
-            <div className="h-20 bg-gray-200 rounded-lg mb-4"></div>
-            <div className="h-20 bg-gray-200 rounded-lg mb-4"></div>
-            <div className="h-20 bg-gray-200 rounded-lg"></div>
-          </div>
-        </div>
-      </Card>
-    )
+    return <div>Učitavanje upita...</div>
   }
 
-  if (!inquiries.length) {
+  if (inquiries.length === 0) {
     return (
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">
-          {type === "buying" ? "Aktivne Nabavke" : "Potencijalne Prodaje"}
-        </h2>
-        <p className="text-gray-500 text-center py-8">
+        <p className="text-center text-gray-500">
           {type === "buying" 
-            ? "Nemate aktivnih upita za nabavku" 
-            : "Trenutno nema upita koji odgovaraju vašim kategorijama proizvoda"}
+            ? "Još uvek nemate aktivnih upita za nabavku." 
+            : "Trenutno nema upita koji odgovaraju vašim tagovima."}
         </p>
       </Card>
     )
   }
 
   return (
-    <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4">
-        {type === "buying" ? "Aktivne Nabavke" : "Potencijalne Prodaje"}
-      </h2>
-      <div className="space-y-4">
-        {inquiries.map((inquiry) => (
-          <Card key={inquiry.id} className="p-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-2">
-                <h3 className="font-semibold">{inquiry.title}</h3>
-                <p className="text-sm text-gray-600">{inquiry.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {inquiry.tags?.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-500">
-                  {format(new Date(inquiry.created_at), "dd.MM.yyyy.")}
-                </p>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">
+        {type === "buying" ? "Vaši upiti" : "Upiti koji odgovaraju vašim tagovima"}
+      </h3>
+      
+      {inquiries.map((inquiry) => (
+        <Card key={inquiry.id} className="p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h4 className="text-xl font-semibold mb-2">{inquiry.title}</h4>
+              <p className="text-gray-600 mb-4">{inquiry.description}</p>
+              <div className="flex flex-wrap gap-2">
+                {inquiry.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
               </div>
-              <InquiryChat
+            </div>
+            {type === "selling" && (
+              <Button
+                onClick={() => {
+                  setSelectedInquiryId(inquiry.id)
+                  setShowOfferForm(true)
+                }}
+              >
+                Pošalji ponudu
+              </Button>
+            )}
+          </div>
+
+          {selectedInquiryId === inquiry.id && !showOfferForm && (
+            <div className="mt-4">
+              <OfferList
                 inquiryId={inquiry.id}
                 inquiryTitle={inquiry.title}
-                onClose={() => {}}
               />
             </div>
-          </Card>
-        ))}
-      </div>
-    </Card>
+          )}
+        </Card>
+      ))}
+
+      <Dialog 
+        open={showOfferForm} 
+        onOpenChange={(open) => {
+          setShowOfferForm(open)
+          if (!open) setSelectedInquiryId(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nova ponuda</DialogTitle>
+          </DialogHeader>
+          {selectedInquiryId && (
+            <OfferForm
+              inquiryId={selectedInquiryId}
+              onOfferSubmitted={() => {
+                setShowOfferForm(false)
+                setSelectedInquiryId(null)
+              }}
+              onCancel={() => {
+                setShowOfferForm(false)
+                setSelectedInquiryId(null)
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
