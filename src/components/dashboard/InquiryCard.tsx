@@ -27,6 +27,7 @@ export const InquiryCard = ({
   const [showChat, setShowChat] = useState(false)
   const [hasExistingOffer, setHasExistingOffer] = useState(false)
   const [offerId, setOfferId] = useState<string | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const checkExistingOffer = async () => {
     try {
@@ -48,9 +49,51 @@ export const InquiryCard = ({
     }
   }
 
+  const checkUnreadMessages = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: messages, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('inquiry_id', inquiry.id)
+        .eq('status', 'delivered')
+        .neq('sender_id', user.id)
+
+      if (error) throw error
+      
+      setUnreadCount(messages?.length || 0)
+    } catch (error) {
+      console.error('Error checking unread messages:', error)
+    }
+  }
+
   useEffect(() => {
     if (type === "selling") {
       checkExistingOffer()
+    }
+    checkUnreadMessages()
+
+    // Subscribe to new messages
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `inquiry_id=eq.${inquiry.id}`
+        },
+        () => {
+          checkUnreadMessages()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
     }
   }, [inquiry.id, type])
 
@@ -75,12 +118,19 @@ export const InquiryCard = ({
                 Pošalji ponudu
               </Button>
             ) : (
-              <InquiryChat
-                inquiryId={inquiry.id}
-                inquiryTitle={inquiry.title}
-                offerId={offerId}
-                onClose={() => setShowChat(false)}
-              />
+              <div className="flex flex-col items-end gap-2">
+                {unreadCount > 0 && (
+                  <Badge variant="destructive">
+                    {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
+                  </Badge>
+                )}
+                <InquiryChat
+                  inquiryId={inquiry.id}
+                  inquiryTitle={inquiry.title}
+                  offerId={offerId}
+                  onClose={() => setShowChat(false)}
+                />
+              </div>
             )}
           </div>
         ) : (
@@ -89,6 +139,11 @@ export const InquiryCard = ({
               {offersCount && offersCount > 0 && (
                 <Badge variant="secondary">
                   {offersCount} {offersCount === 1 ? 'ponuda' : 'ponuda'}
+                </Badge>
+              )}
+              {unreadCount > 0 && (
+                <Badge variant="destructive">
+                  {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
                 </Badge>
               )}
               <Button
