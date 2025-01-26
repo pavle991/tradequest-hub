@@ -33,13 +33,13 @@ export const InvoiceDetails = ({
 
       if (error) throw error
 
-      onVerify()
-      setShowRating(true)
-      
       toast({
         title: "Uspešno",
         description: "Faktura je verifikovana",
       })
+      
+      setShowRating(true)
+      onVerify()
     } catch (error) {
       console.error('Error verifying invoice:', error)
       toast({
@@ -104,6 +104,7 @@ export const InvoiceDetails = ({
         sellerId={invoice.seller_id}
         buyerId={invoice.buyer_id}
         onRatingSubmitted={() => {
+          setShowRating(false)
           toast({
             title: "Uspešno",
             description: "Hvala vam na oceni!",

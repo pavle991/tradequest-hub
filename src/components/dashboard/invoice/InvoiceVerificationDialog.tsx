@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
@@ -73,39 +73,14 @@ export const InvoiceVerificationDialog = ({
     }
   }
 
-  const handleVerifyInvoice = async () => {
-    if (!invoice) return
-
-    try {
-      const { error } = await supabase
-        .from('invoices')
-        .update({ status: 'verified' })
-        .eq('id', invoice.id)
-
-      if (error) throw error
-
-      toast({
-        title: "Uspešno",
-        description: "Faktura je uspešno verifikovana",
-      })
-      
-      // Refresh invoice data
-      fetchInvoice()
-    } catch (error) {
-      console.error('Error verifying invoice:', error)
-      toast({
-        title: "Greška",
-        description: "Došlo je do greške prilikom verifikacije fakture",
-        variant: "destructive",
-      })
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Verifikacija fakture</DialogTitle>
+          <DialogDescription>
+            Pregledajte i verifikujte fakturu
+          </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           {isLoading ? (
@@ -116,7 +91,9 @@ export const InvoiceVerificationDialog = ({
             <InvoiceDetails 
               invoice={invoice} 
               invoiceItems={invoiceItems}
-              onVerify={handleVerifyInvoice}
+              onVerify={() => {
+                onOpenChange(false)
+              }}
             />
           )}
         </div>
