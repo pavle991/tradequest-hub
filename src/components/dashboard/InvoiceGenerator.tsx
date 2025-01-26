@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus } from "lucide-react"
+import { InvoiceItem } from "./invoice/InvoiceItem"
+import { InvoiceSummary } from "./invoice/InvoiceSummary"
 
 type InvoiceItem = {
   description: string
@@ -105,7 +107,6 @@ export const InvoiceGenerator = ({
         return
       }
 
-      // Kreiranje fakture
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
@@ -113,7 +114,7 @@ export const InvoiceGenerator = ({
           offer_id: offerId,
           seller_id: user.id,
           invoice_number: `INV-${Date.now()}`,
-          due_date: invoiceData.dueDate, // Now passing the string directly
+          due_date: invoiceData.dueDate,
           total_amount: calculateTotalAmount(),
           vat_amount: calculateVatAmount(),
           total_with_vat: calculateTotalAmount() + calculateVatAmount(),
@@ -123,7 +124,6 @@ export const InvoiceGenerator = ({
 
       if (invoiceError) throw invoiceError
 
-      // Kreiranje stavki fakture
       const invoiceItems = items.map(item => ({
         invoice_id: invoice.id,
         description: item.description,
@@ -209,88 +209,20 @@ export const InvoiceGenerator = ({
             </div>
 
             {items.map((item, index) => (
-              <div key={index} className="space-y-4 p-4 border rounded-lg">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Opis</Label>
-                    <Input
-                      value={item.description}
-                      onChange={(e) => updateItem(index, 'description', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Jedinica mere</Label>
-                    <Input
-                      value={item.unit}
-                      onChange={(e) => updateItem(index, 'unit', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Količina</Label>
-                    <Input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Cena po jedinici (RSD)</Label>
-                    <Input
-                      type="number"
-                      value={item.unitPrice}
-                      onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Popust (%)</Label>
-                    <Input
-                      type="number"
-                      value={item.discount}
-                      onChange={(e) => updateItem(index, 'discount', parseFloat(e.target.value))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>PDV (%)</Label>
-                    <Input
-                      type="number"
-                      value={item.vatRate}
-                      onChange={(e) => updateItem(index, 'vatRate', parseFloat(e.target.value))}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-600">
-                    Iznos: {calculateItemAmount(item).toLocaleString('sr-RS')} RSD
-                    <br />
-                    PDV: {(calculateItemAmount(item) * (item.vatRate / 100)).toLocaleString('sr-RS')} RSD
-                  </div>
-                  {items.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeItem(index)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
+              <InvoiceItem
+                key={index}
+                item={item}
+                index={index}
+                onUpdate={updateItem}
+                onRemove={removeItem}
+                showRemove={items.length > 1}
+              />
             ))}
 
-            <div className="flex justify-end space-x-4 text-right">
-              <div>
-                <div className="text-sm text-gray-600">Ukupno bez PDV-a:</div>
-                <div className="font-semibold">{calculateTotalAmount().toLocaleString('sr-RS')} RSD</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">PDV:</div>
-                <div className="font-semibold">{calculateVatAmount().toLocaleString('sr-RS')} RSD</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">Ukupno sa PDV-om:</div>
-                <div className="font-semibold">{(calculateTotalAmount() + calculateVatAmount()).toLocaleString('sr-RS')} RSD</div>
-              </div>
-            </div>
+            <InvoiceSummary
+              totalAmount={calculateTotalAmount()}
+              vatAmount={calculateVatAmount()}
+            />
           </div>
 
           <Button onClick={handleGenerateInvoice} className="w-full">
