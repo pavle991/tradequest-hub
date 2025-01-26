@@ -89,12 +89,12 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
                 hour: '2-digit', 
                 minute: '2-digit' 
               }),
-              status: newMessage.status
+              status: newMessage.status as 'delivered' | 'read'
             }])
           } else if (payload.eventType === 'UPDATE') {
             setMessages(prev => prev.map(msg => 
               msg.id === payload.new.id 
-                ? { ...msg, status: payload.new.status }
+                ? { ...msg, status: payload.new.status as 'delivered' | 'read' }
                 : msg
             ))
           }
@@ -128,7 +128,7 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
               hour: '2-digit',
               minute: '2-digit'
             }),
-            status: msg.status
+            status: msg.status as 'delivered' | 'read'
           }))
           setMessages(formattedMessages)
         }
