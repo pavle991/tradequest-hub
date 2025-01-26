@@ -1,31 +1,16 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
-  DialogDescription,
 } from "@/components/ui/dialog"
-import { ChatMessage } from "./ChatMessage"
-import { SellerRating } from "./SellerRating"
 import { supabase } from "@/integrations/supabase/client"
-
-type Message = {
-  id: string
-  sender: string
-  content: string
-  timestamp: string
-  sellerId?: string
-  sellerRating?: number
-  totalSales?: number
-  numberOfRatings?: number
-  status?: 'delivered' | 'read'
-}
+import { ChatHeader } from "./chat/ChatHeader"
+import { ChatMessageList } from "./chat/ChatMessageList"
+import { ChatInput } from "./chat/ChatInput"
+import { type Message } from "./types"
 
 type InquiryChatProps = {
   inquiryId: string
@@ -41,7 +26,6 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
   const { toast } = useToast()
 
   useEffect(() => {
-    // Get current user
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -50,7 +34,6 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
     }
     getCurrentUser()
 
-    // Subscribe to real-time updates
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -94,7 +77,7 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
     if (!newMessage.trim() || !userId) return
     
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('messages')
         .insert({
           inquiry_id: inquiryId,
@@ -136,47 +119,23 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{inquiryTitle}</DialogTitle>
-          {selectedSeller && (
-            <DialogDescription>
-              {messages
-                .find(m => m.sellerId === selectedSeller)
-                ?.sender && (
-                <SellerRating
-                  rating={messages.find(m => m.sellerId === selectedSeller)?.sellerRating || 0}
-                  numberOfRatings={messages.find(m => m.sellerId === selectedSeller)?.numberOfRatings || 0}
-                  totalSales={messages.find(m => m.sellerId === selectedSeller)?.totalSales || 0}
-                />
-              )}
-            </DialogDescription>
-          )}
-        </DialogHeader>
+        <ChatHeader 
+          title={inquiryTitle}
+          selectedSeller={selectedSeller}
+          messages={messages}
+        />
         <div className="flex flex-col h-[500px]">
-          <ScrollArea className="flex-grow p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  selectedSeller={selectedSeller}
-                  onSelectSeller={setSelectedSeller}
-                  onMarkAsRead={() => handleMarkAsRead(message.id)}
-                />
-              ))}
-            </div>
-          </ScrollArea>
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Unesite poruku..."
-                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              />
-              <Button onClick={handleSendMessage}>Pošalji</Button>
-            </div>
-          </div>
+          <ChatMessageList
+            messages={messages}
+            selectedSeller={selectedSeller}
+            onSelectSeller={setSelectedSeller}
+            onMarkAsRead={handleMarkAsRead}
+          />
+          <ChatInput
+            newMessage={newMessage}
+            onMessageChange={setNewMessage}
+            onSendMessage={handleSendMessage}
+          />
         </div>
       </DialogContent>
     </Dialog>
