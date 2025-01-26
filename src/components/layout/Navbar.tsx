@@ -73,7 +73,7 @@ export const Navbar = () => {
                 </Button>
               </>
             ) : (
-              <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+              <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -86,12 +86,10 @@ export const Navbar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <DialogTrigger asChild>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Podešavanja profila</span>
-                      </DropdownMenuItem>
-                    </DialogTrigger>
+                    <DropdownMenuItem onSelect={() => setIsProfileOpen(true)}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Podešavanja profila</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/dashboard" className="flex items-center">
                         <BarChart3 className="mr-2 h-4 w-4" />
@@ -104,10 +102,12 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <DialogContent className="sm:max-w-[600px]">
-                  <CompanyProfile />
-                </DialogContent>
-              </Dialog>
+                <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <CompanyProfile />
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
           </div>
         </div>
