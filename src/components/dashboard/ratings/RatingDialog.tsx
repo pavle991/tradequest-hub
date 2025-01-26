@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Star } from "lucide-react"
 import {
   Dialog,
@@ -43,24 +43,7 @@ export const RatingDialog = ({
   ])
   const [comment, setComment] = useState("")
   const [loading, setLoading] = useState(false)
-  const [canRate, setCanRate] = useState(false)
   const { toast } = useToast()
-
-  useEffect(() => {
-    checkRatingPermission()
-  }, [buyerId])
-
-  const checkRatingPermission = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      // Check if current user is the buyer
-      setCanRate(user.id === buyerId)
-    } catch (error) {
-      console.error('Error checking rating permission:', error)
-    }
-  }
 
   const handleRatingChange = (parameterId: string, value: number) => {
     setParameters(prev => 
@@ -76,15 +59,6 @@ export const RatingDialog = ({
   }
 
   const handleSubmit = async () => {
-    if (!canRate) {
-      toast({
-        title: "Greška",
-        description: "Nemate dozvolu da ocenite ovog prodavca",
-        variant: "destructive",
-      })
-      return
-    }
-
     if (parameters.some(param => param.value === 0)) {
       toast({
         title: "Greška",
@@ -149,10 +123,6 @@ export const RatingDialog = ({
       ))}
     </div>
   )
-
-  if (!canRate) {
-    return null
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

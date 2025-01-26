@@ -84,7 +84,7 @@ export const BuyerActions = ({
             Oceni prodavca
           </Button>
         </div>
-      ) : invoice?.status === 'pending' ? (
+      ) : (
         <Button 
           variant="outline" 
           className="gap-2"
@@ -93,7 +93,7 @@ export const BuyerActions = ({
           <FileCheck className="w-4 h-4" />
           Verifikuj fakturu
         </Button>
-      ) : null}
+      )}
       
       <InvoiceVerificationDialog
         open={isVerificationOpen}
