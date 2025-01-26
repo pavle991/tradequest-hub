@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -6,33 +6,127 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { X } from "lucide-react"
+import { supabase } from "@/integrations/supabase/client"
 
 type CompanyData = {
-  name: string
-  address: string
-  phone: string
-  email: string
-  description: string
+  company_name: string
+  address: string | null
+  phone: string | null
+  description: string | null
   tags: string[]
 }
 
 export const CompanyProfile = () => {
   const { toast } = useToast()
+  const [loading, setLoading] = useState(true)
   const [companyData, setCompanyData] = useState<CompanyData>({
-    name: "Moja Firma DOO",
-    address: "Glavna ulica 123",
-    phone: "+381111234567",
-    email: "kontakt@mojafirma.rs",
-    description: "Prodaja kancelarijskog materijala",
-    tags: ["Kancelarijski materijal", "Papir", "Toneri"]
+    company_name: "",
+    address: "",
+    phone: "",
+    description: "",
+    tags: []
   })
   const [newTag, setNewTag] = useState("")
 
-  const handleSave = () => {
-    toast({
-      title: "Uspešno",
-      description: "Podaci firme su ažurirani",
-    })
+  useEffect(() => {
+    fetchProfile()
+  }, [])
+
+  const fetchProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast({
+          title: "Greška",
+          description: "Niste prijavljeni",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching profile:', error)
+        toast({
+          title: "Greška",
+          description: "Došlo je do greške prilikom učitavanja profila",
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (data) {
+        setCompanyData({
+          company_name: data.company_name || "",
+          address: data.address || "",
+          phone: data.phone || "",
+          description: data.description || "",
+          tags: [] // We'll implement tags later
+        })
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Greška",
+        description: "Došlo je do greške prilikom učitavanja profila",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast({
+          title: "Greška",
+          description: "Niste prijavljeni",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          company_name: companyData.company_name,
+          address: companyData.address,
+          phone: companyData.phone,
+          description: companyData.description,
+        })
+        .eq('id', user.id)
+
+      if (error) {
+        console.error('Error updating profile:', error)
+        toast({
+          title: "Greška",
+          description: "Došlo je do greške prilikom čuvanja profila",
+          variant: "destructive",
+        })
+        return
+      }
+
+      toast({
+        title: "Uspešno",
+        description: "Podaci firme su ažurirani",
+      })
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Greška",
+        description: "Došlo je do greške prilikom čuvanja profila",
+        variant: "destructive",
+      })
+    }
   }
 
   const addTag = () => {
@@ -52,6 +146,20 @@ export const CompanyProfile = () => {
     })
   }
 
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-8 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-gray-200 rounded"></div>
+          <div className="h-24 bg-gray-200 rounded"></div>
+        </div>
+      </Card>
+    )
+  }
+
   return (
     <Card className="p-6">
       <h2 className="text-2xl font-bold mb-6">Profil Firme</h2>
@@ -59,36 +167,28 @@ export const CompanyProfile = () => {
         <div>
           <label className="block text-sm font-medium mb-1">Naziv firme</label>
           <Input
-            value={companyData.name}
-            onChange={(e) => setCompanyData({ ...companyData, name: e.target.value })}
+            value={companyData.company_name}
+            onChange={(e) => setCompanyData({ ...companyData, company_name: e.target.value })}
           />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Adresa</label>
           <Input
-            value={companyData.address}
+            value={companyData.address || ""}
             onChange={(e) => setCompanyData({ ...companyData, address: e.target.value })}
           />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Telefon</label>
           <Input
-            value={companyData.phone}
+            value={companyData.phone || ""}
             onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <Input
-            type="email"
-            value={companyData.email}
-            onChange={(e) => setCompanyData({ ...companyData, email: e.target.value })}
           />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Opis delatnosti</label>
           <Textarea
-            value={companyData.description}
+            value={companyData.description || ""}
             onChange={(e) => setCompanyData({ ...companyData, description: e.target.value })}
             rows={4}
           />
