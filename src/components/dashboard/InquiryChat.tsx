@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useToast } from "@/hooks/use-toast"
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { ChatMessage } from "./ChatMessage"
 import { SellerRating } from "./SellerRating"
+import { supabase } from "@/integrations/supabase/client"
 
 type Message = {
   id: number
@@ -22,6 +24,7 @@ type Message = {
   sellerRating?: number
   totalSales?: number
   numberOfRatings?: number
+  status?: 'delivered' | 'read'
 }
 
 type InquiryChatProps = {
@@ -31,64 +34,89 @@ type InquiryChatProps = {
 }
 
 export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      sender: "Kupac",
-      content: "Potrebno mi je 100 kutija A4 papira, 80g/m2. Da li možete da mi dostavite ponudu sa cenom po kutiji i rokovima isporuke?",
-      timestamp: "10:00"
-    },
-    {
-      id: 2,
-      sender: "Prodavac 1",
-      content: "Poštovani, cena po kutiji je 1200 dinara sa PDV-om. Isporuka je moguća u roku od 2 radna dana na teritoriji Beograda. Minimalna količina za besplatnu dostavu je 50 kutija.",
-      timestamp: "10:05",
-      sellerId: 1,
-      sellerRating: 4.5,
-      totalSales: 1250000,
-      numberOfRatings: 28
-    },
-    {
-      id: 3,
-      sender: "Prodavac 2",
-      content: "Poštovani, možemo ponuditi kutiju po ceni od 1180 dinara sa PDV-om. Isporuka 3-4 radna dana, besplatna dostava za porudžbine preko 100.000 dinara.",
-      timestamp: "10:07",
-      sellerId: 2,
-      sellerRating: 4.8,
-      totalSales: 2100000,
-      numberOfRatings: 45
-    },
-    {
-      id: 4,
-      sender: "Prodavac 3",
-      content: "Zdravo, naša ponuda je 1250 dinara po kutiji sa PDV-om. Isporuka je garantovana sledećeg radnog dana. Besplatna dostava za sve porudžbine.",
-      timestamp: "10:10",
-      sellerId: 3,
-      sellerRating: 4.2,
-      totalSales: 980000,
-      numberOfRatings: 19
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [selectedSeller, setSelectedSeller] = useState<number | null>(null)
   const [newMessage, setNewMessage] = useState("")
+  const { toast } = useToast()
 
-  const handleSendMessage = () => {
+  useEffect(() => {
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `inquiry_id=eq.${inquiryId}`
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newMessage = payload.new
+            setMessages(prev => [...prev, {
+              id: newMessage.id,
+              sender: newMessage.sender_id === supabase.auth.user()?.id ? 'Kupac' : 'Prodavac',
+              content: newMessage.content,
+              timestamp: new Date(newMessage.created_at).toLocaleTimeString('sr-RS', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              }),
+              status: newMessage.status
+            }])
+          } else if (payload.eventType === 'UPDATE') {
+            setMessages(prev => prev.map(msg => 
+              msg.id === payload.new.id 
+                ? { ...msg, status: payload.new.status }
+                : msg
+            ))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [inquiryId])
+
+  const handleSendMessage = async () => {
     if (!newMessage.trim()) return
     
-    const message: Message = {
-      id: Date.now(),
-      sender: "Kupac",
-      content: newMessage,
-      timestamp: new Date().toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' })
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          inquiry_id: inquiryId,
+          sender_id: supabase.auth.user()?.id,
+          content: newMessage,
+          status: 'delivered'
+        })
+
+      if (error) throw error
+
+      setNewMessage("")
+    } catch (error) {
+      toast({
+        title: "Greška",
+        description: "Nije moguće poslati poruku. Pokušajte ponovo.",
+        variant: "destructive"
+      })
     }
-    
-    setMessages([...messages, message])
-    setNewMessage("")
   }
 
-  const filteredMessages = selectedSeller 
-    ? messages.filter(m => !m.sellerId || m.sellerId === selectedSeller)
-    : messages
+  const handleMarkAsRead = async (messageId: number) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ status: 'read' })
+        .eq('id', messageId)
+
+      if (error) throw error
+    } catch (error) {
+      console.error('Error marking message as read:', error)
+    }
+  }
 
   return (
     <Dialog>
@@ -117,12 +145,13 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, onClose }: InquiryChatPro
         <div className="flex flex-col h-[500px]">
           <ScrollArea className="flex-grow p-4">
             <div className="space-y-4">
-              {filteredMessages.map((message) => (
+              {messages.map((message) => (
                 <ChatMessage
                   key={message.id}
                   message={message}
                   selectedSeller={selectedSeller}
                   onSelectSeller={setSelectedSeller}
+                  onMarkAsRead={() => handleMarkAsRead(message.id)}
                 />
               ))}
             </div>

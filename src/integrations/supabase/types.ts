@@ -57,6 +57,7 @@ export type Database = {
           id: string
           inquiry_id: string
           sender_id: string
+          status: string
         }
         Insert: {
           content: string
@@ -64,6 +65,7 @@ export type Database = {
           id?: string
           inquiry_id: string
           sender_id: string
+          status?: string
         }
         Update: {
           content?: string
@@ -71,6 +73,7 @@ export type Database = {
           id?: string
           inquiry_id?: string
           sender_id?: string
+          status?: string
         }
         Relationships: [
           {

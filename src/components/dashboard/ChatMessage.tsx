@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar } from "@/components/ui/avatar"
-import { MessageCircle } from "lucide-react"
+import { MessageCircle, Check } from "lucide-react"
 import { SellerRating } from "./SellerRating"
 
 type ChatMessageProps = {
@@ -14,12 +14,19 @@ type ChatMessageProps = {
     sellerRating?: number
     totalSales?: number
     numberOfRatings?: number
+    status?: 'delivered' | 'read'
   }
   selectedSeller: number | null
   onSelectSeller: (sellerId: number) => void
+  onMarkAsRead: () => void
 }
 
-export const ChatMessage = ({ message, selectedSeller, onSelectSeller }: ChatMessageProps) => {
+export const ChatMessage = ({ 
+  message, 
+  selectedSeller, 
+  onSelectSeller,
+  onMarkAsRead 
+}: ChatMessageProps) => {
   const isBuyer = message.sender === "Kupac"
 
   return (
@@ -28,7 +35,18 @@ export const ChatMessage = ({ message, selectedSeller, onSelectSeller }: ChatMes
         <Avatar />
         <Card className="p-3">
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold">{message.sender}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold">{message.sender}</p>
+              {message.status && (
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  {message.status === 'read' ? (
+                    <Check className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Check className="w-4 h-4" />
+                  )}
+                </div>
+              )}
+            </div>
             {message.sellerRating && (
               <SellerRating
                 rating={message.sellerRating}
@@ -43,7 +61,10 @@ export const ChatMessage = ({ message, selectedSeller, onSelectSeller }: ChatMes
                 variant="secondary" 
                 size="sm"
                 className="mt-2"
-                onClick={() => onSelectSeller(message.sellerId!)}
+                onClick={() => {
+                  onSelectSeller(message.sellerId!)
+                  onMarkAsRead()
+                }}
               >
                 <MessageCircle className="mr-2" />
                 Nastavi razgovor
