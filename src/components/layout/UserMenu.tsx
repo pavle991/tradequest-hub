@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { CompanyProfile } from "@/components/dashboard/CompanyProfile";
@@ -34,7 +34,7 @@ export const UserMenu = () => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-accent">
             <Avatar className="h-10 w-10">
               <AvatarImage src="/placeholder.svg" alt="Company Logo" />
               <AvatarFallback>
@@ -43,25 +43,32 @@ export const UserMenu = () => {
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuItem onSelect={() => setIsProfileOpen(true)}>
+        <DropdownMenuContent align="end" className="w-56 bg-white">
+          <DropdownMenuItem onSelect={() => navigate("/dashboard")} className="cursor-pointer">
+            <Building2 className="mr-2 h-4 w-4" />
+            <span>Otvori Dashboard</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => navigate("/statistics")} className="cursor-pointer">
+            <BarChart3 className="mr-2 h-4 w-4" />
+            <span>Statistika</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setIsProfileOpen(true)} className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>Podešavanja profila</span>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/dashboard" className="flex items-center">
-              <BarChart3 className="mr-2 h-4 w-4" />
-              <span>Statistika</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+          <DropdownMenuItem 
+            onSelect={handleLogout} 
+            className="text-red-600 cursor-pointer"
+          >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Odjavi se</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <DialogContent className="sm:max-w-[600px]">
+          <DialogTitle>Podešavanja profila</DialogTitle>
           <CompanyProfile />
         </DialogContent>
       </Dialog>
