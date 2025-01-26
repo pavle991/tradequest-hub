@@ -8,33 +8,59 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { InvoiceDetails } from "./InvoiceDetails"
 
 type InvoiceVerificationDialogProps = {
-  inquiryId: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  inquiryId: string
 }
 
 export const InvoiceVerificationDialog = ({
-  inquiryId,
   open,
   onOpenChange,
+  inquiryId
 }: InvoiceVerificationDialogProps) => {
   const [invoice, setInvoice] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [invoiceItems, setInvoiceItems] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
 
-  const fetchInvoiceData = async () => {
+  useEffect(() => {
+    if (open) {
+      fetchInvoice()
+    }
+  }, [open, inquiryId])
+
+  const fetchInvoice = async () => {
     try {
       setIsLoading(true)
-      const { data, error } = await supabase
+      
+      const { data: invoiceData, error: invoiceError } = await supabase
         .from('invoices')
-        .select('*, invoice_items(*)')
+        .select('*')
         .eq('inquiry_id', inquiryId)
         .maybeSingle()
 
-      if (error) throw error
-      setInvoice(data)
+      if (invoiceError) throw invoiceError
+
+      if (!invoiceData) {
+        setInvoice(null)
+        setInvoiceItems([])
+        setIsLoading(false)
+        return
+      }
+
+      setInvoice(invoiceData)
+
+      const { data: itemsData, error: itemsError } = await supabase
+        .from('invoice_items')
+        .select('*')
+        .eq('invoice_id', invoiceData.id)
+
+      if (itemsError) throw itemsError
+
+      setInvoiceItems(itemsData || [])
     } catch (error) {
       console.error('Error fetching invoice:', error)
       toast({
@@ -47,15 +73,10 @@ export const InvoiceVerificationDialog = ({
     }
   }
 
-  useEffect(() => {
-    if (open) {
-      fetchInvoiceData()
-    }
-  }, [open, inquiryId])
-
   const handleVerifyInvoice = async () => {
+    if (!invoice) return
+
     try {
-      setIsLoading(true)
       const { error } = await supabase
         .from('invoices')
         .update({ status: 'verified' })
@@ -65,9 +86,11 @@ export const InvoiceVerificationDialog = ({
 
       toast({
         title: "Uspešno",
-        description: "Faktura je verifikovana",
+        description: "Faktura je uspešno verifikovana",
       })
-      onOpenChange(false)
+      
+      // Refresh invoice data
+      fetchInvoice()
     } catch (error) {
       console.error('Error verifying invoice:', error)
       toast({
@@ -75,68 +98,28 @@ export const InvoiceVerificationDialog = ({
         description: "Došlo je do greške prilikom verifikacije fakture",
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Verifikacija fakture</DialogTitle>
         </DialogHeader>
-
-        {isLoading ? (
-          <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-          </div>
-        ) : !invoice ? (
-          <div className="text-center p-8">
+        <div className="py-4">
+          {isLoading ? (
+            <p>Učitavanje...</p>
+          ) : !invoice ? (
             <p>Faktura nije pronađena za ovaj upit.</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold mb-2">Detalji fakture</h3>
-              <div className="space-y-2">
-                <p>Broj fakture: {invoice.invoice_number}</p>
-                <p>Datum: {new Date(invoice.invoice_date).toLocaleDateString()}</p>
-                <p>Rok plaćanja: {new Date(invoice.due_date).toLocaleDateString()}</p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">Stavke</h3>
-              <div className="space-y-2">
-                {invoice.invoice_items?.map((item: any) => (
-                  <div key={item.id} className="border p-2 rounded">
-                    <p>{item.description}</p>
-                    <p>Količina: {item.quantity} {item.unit}</p>
-                    <p>Cena: {item.unit_price}</p>
-                    <p>Iznos: {item.amount}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p>Ukupan iznos: {invoice.total_amount}</p>
-              <p>PDV: {invoice.vat_amount}</p>
-              <p className="font-semibold">
-                Ukupno sa PDV: {invoice.total_with_vat}
-              </p>
-            </div>
-
-            <Button 
-              onClick={handleVerifyInvoice} 
-              className="w-full"
-              disabled={isLoading || invoice.status === 'verified'}
-            >
-              {invoice.status === 'verified' ? 'Faktura je verifikovana' : 'Verifikuj fakturu'}
-            </Button>
-          </div>
-        )}
+          ) : (
+            <InvoiceDetails 
+              invoice={invoice} 
+              invoiceItems={invoiceItems}
+              onVerify={handleVerifyInvoice}
+            />
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )
