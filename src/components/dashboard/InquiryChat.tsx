@@ -30,23 +30,32 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
 
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUserId(user.id)
-        
-        // Proveri da li je trenutni korisnik kupac
-        const { data: inquiry } = await supabase
-          .from('inquiries')
-          .select('user_id')
-          .eq('id', inquiryId)
-          .single()
-        
-        setIsBuyer(inquiry?.user_id === user.id)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUserId(user.id)
+          
+          // Check if current user is the buyer
+          const { data: inquiry, error } = await supabase
+            .from('inquiries')
+            .select('user_id')
+            .eq('id', inquiryId)
+            .maybeSingle()
+          
+          if (error) {
+            console.error('Error fetching inquiry:', error)
+            return
+          }
+
+          setIsBuyer(inquiry?.user_id === user.id)
+        }
+      } catch (error) {
+        console.error('Error getting current user:', error)
       }
     }
     getCurrentUser()
 
-    // Učitaj ponudu ako postoji offerId
+    // Load offer if offerId exists
     if (offerId) {
       fetchOffer()
     }
@@ -88,7 +97,7 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [inquiryId, userId])
+  }, [inquiryId, userId, offerId])
 
   const fetchOffer = async () => {
     if (!offerId) return
@@ -98,10 +107,16 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
         .from('offers')
         .select('*')
         .eq('id', offerId)
-        .single()
+        .maybeSingle()
 
-      if (error) throw error
-      setOffer(data)
+      if (error) {
+        console.error('Error fetching offer:', error)
+        return
+      }
+
+      if (data) {
+        setOffer(data)
+      }
     } catch (error) {
       console.error('Error fetching offer:', error)
     }
@@ -120,7 +135,14 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
           status: 'delivered'
         })
 
-      if (error) throw error
+      if (error) {
+        toast({
+          title: "Greška",
+          description: "Nije moguće poslati poruku. Pokušajte ponovo.",
+          variant: "destructive"
+        })
+        return
+      }
 
       setNewMessage("")
     } catch (error) {
@@ -139,7 +161,9 @@ export const InquiryChat = ({ inquiryId, inquiryTitle, offerId, onClose }: Inqui
         .update({ status: 'read' })
         .eq('id', messageId)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error marking message as read:', error)
+      }
     } catch (error) {
       console.error('Error marking message as read:', error)
     }
