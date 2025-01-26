@@ -26,6 +26,7 @@ export const InquiryCard = ({
 }: InquiryCardProps) => {
   const [showChat, setShowChat] = useState(false)
   const [hasExistingOffer, setHasExistingOffer] = useState(false)
+  const [offerId, setOfferId] = useState<string | null>(null)
 
   const checkExistingOffer = async () => {
     try {
@@ -38,7 +39,10 @@ export const InquiryCard = ({
         .eq('inquiry_id', inquiry.id)
         .eq('seller_id', user.id)
 
-      setHasExistingOffer(offers && offers.length > 0)
+      if (offers && offers.length > 0) {
+        setHasExistingOffer(true)
+        setOfferId(offers[0].id)
+      }
     } catch (error) {
       console.error('Error checking existing offer:', error)
     }
@@ -66,10 +70,17 @@ export const InquiryCard = ({
         </div>
         {type === "selling" ? (
           <div className="flex flex-col gap-2">
-            {!hasExistingOffer && (
+            {!hasExistingOffer ? (
               <Button onClick={() => onOpenOfferForm(inquiry.id)}>
                 Pošalji ponudu
               </Button>
+            ) : (
+              <InquiryChat
+                inquiryId={inquiry.id}
+                inquiryTitle={inquiry.title}
+                offerId={offerId}
+                onClose={() => setShowChat(false)}
+              />
             )}
           </div>
         ) : (
