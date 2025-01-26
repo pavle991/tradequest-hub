@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card"
 import { OfferList } from "./OfferList"
 import { InquiryChat } from "./InquiryChat"
 import { type Inquiry } from "./types"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 
 type InquiryCardProps = {
@@ -47,7 +47,7 @@ export const InquiryCard = ({
   }
 
   // Call checkExistingOffer when component mounts
-  useState(() => {
+  useEffect(() => {
     if (type === "selling") {
       checkExistingOffer()
     }
