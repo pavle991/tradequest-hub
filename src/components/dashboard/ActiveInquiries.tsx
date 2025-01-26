@@ -32,8 +32,8 @@ export const ActiveInquiries = ({ inquiries, type }: ActiveInquiriesProps) => {
                 </p>
                 {inquiry.tags && inquiry.tags.length > 0 && (
                   <div className="flex gap-2 mt-2">
-                    {inquiry.tags.map((tag, index) => (
-                      <span key={index} className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                    {inquiry.tags.map((tag, i) => (
+                      <span key={i} className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
                         {tag}
                       </span>
                     ))}
