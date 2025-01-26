@@ -38,6 +38,8 @@ export const RatingDialog = ({
     { id: 'communication', label: 'Komunikacija', value: 0 },
     { id: 'professionalism', label: 'Profesionalnost', value: 0 },
     { id: 'timeliness', label: 'Poštovanje rokova', value: 0 },
+    { id: 'expertise', label: 'Stručnost', value: 0 },
+    { id: 'value', label: 'Vrednost za novac', value: 0 }
   ])
   const [comment, setComment] = useState("")
   const [loading, setLoading] = useState(false)

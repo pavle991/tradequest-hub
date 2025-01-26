@@ -379,6 +379,7 @@ export type Database = {
           created_at: string
           id: string
           invoice_id: string
+          parameters: Json | null
           rated_id: string
           rater_id: string
           rating: number
@@ -388,6 +389,7 @@ export type Database = {
           created_at?: string
           id?: string
           invoice_id: string
+          parameters?: Json | null
           rated_id: string
           rater_id: string
           rating: number
@@ -397,6 +399,7 @@ export type Database = {
           created_at?: string
           id?: string
           invoice_id?: string
+          parameters?: Json | null
           rated_id?: string
           rater_id?: string
           rating?: number

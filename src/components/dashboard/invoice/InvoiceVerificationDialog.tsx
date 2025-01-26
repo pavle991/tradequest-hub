@@ -14,12 +14,14 @@ type InvoiceVerificationDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   inquiryId: string
+  onVerified?: () => void
 }
 
 export const InvoiceVerificationDialog = ({
   open,
   onOpenChange,
-  inquiryId
+  inquiryId,
+  onVerified
 }: InvoiceVerificationDialogProps) => {
   const [invoice, setInvoice] = useState<any>(null)
   const [invoiceItems, setInvoiceItems] = useState<any[]>([])
@@ -73,6 +75,13 @@ export const InvoiceVerificationDialog = ({
     }
   }
 
+  const handleVerified = () => {
+    onOpenChange(false)
+    if (onVerified) {
+      onVerified()
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -95,9 +104,7 @@ export const InvoiceVerificationDialog = ({
             <InvoiceDetails 
               invoice={invoice} 
               invoiceItems={invoiceItems}
-              onVerify={() => {
-                onOpenChange(false)
-              }}
+              onVerify={handleVerified}
             />
           )}
         </div>

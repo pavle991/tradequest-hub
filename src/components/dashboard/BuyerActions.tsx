@@ -66,7 +66,7 @@ export const BuyerActions = ({
       </Button>
 
       {invoice?.status === 'verified' ? (
-        <>
+        <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             className="gap-2"
@@ -83,7 +83,7 @@ export const BuyerActions = ({
             <Star className="w-4 h-4" />
             Oceni prodavca
           </Button>
-        </>
+        </div>
       ) : (
         <Button 
           variant="outline" 
@@ -99,6 +99,10 @@ export const BuyerActions = ({
         open={isVerificationOpen}
         onOpenChange={setIsVerificationOpen}
         inquiryId={inquiryId}
+        onVerified={() => {
+          fetchInvoice()
+          setIsRatingOpen(true)
+        }}
       />
 
       {invoice && (
