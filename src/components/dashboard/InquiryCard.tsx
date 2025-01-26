@@ -38,9 +38,8 @@ export const InquiryCard = ({
         .select('id')
         .eq('inquiry_id', inquiry.id)
         .eq('seller_id', user.id)
-        .single()
 
-      setHasExistingOffer(!!offers)
+      setHasExistingOffer(offers && offers.length > 0)
     } catch (error) {
       console.error('Error checking existing offer:', error)
     }
