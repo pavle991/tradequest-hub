@@ -28,6 +28,7 @@ export const InquiryCard = ({
   const [hasExistingOffer, setHasExistingOffer] = useState(false)
   const [offerId, setOfferId] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [lastCheckedAt, setLastCheckedAt] = useState<Date>(new Date())
 
   const checkExistingOffer = async () => {
     try {
@@ -60,6 +61,7 @@ export const InquiryCard = ({
         .eq('inquiry_id', inquiry.id)
         .eq('status', 'delivered')
         .neq('sender_id', user.id)
+        .gt('created_at', lastCheckedAt.toISOString())
 
       if (type === 'selling' && offerId) {
         query.eq('offer_id', offerId)
@@ -70,6 +72,11 @@ export const InquiryCard = ({
     } catch (error) {
       console.error('Error checking unread messages:', error)
     }
+  }
+
+  const handleClearUnread = () => {
+    setLastCheckedAt(new Date())
+    setUnreadCount(0)
   }
 
   useEffect(() => {
@@ -98,7 +105,7 @@ export const InquiryCard = ({
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [inquiry.id, type, offerId])
+  }, [inquiry.id, type, offerId, lastCheckedAt])
 
   return (
     <Card key={inquiry.id} className="p-6">
@@ -123,9 +130,16 @@ export const InquiryCard = ({
             ) : (
               <div className="flex flex-col items-end gap-2">
                 {unreadCount > 0 && (
-                  <Badge variant="destructive">
-                    {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleClearUnread}
+                    className="flex gap-2 items-center"
+                  >
+                    <Badge variant="destructive">
+                      {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
+                    </Badge>
+                  </Button>
                 )}
                 <InquiryChat
                   inquiryId={inquiry.id}
@@ -145,9 +159,16 @@ export const InquiryCard = ({
                 </Badge>
               )}
               {unreadCount > 0 && (
-                <Badge variant="destructive">
-                  {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
-                </Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleClearUnread}
+                  className="flex gap-2 items-center"
+                >
+                  <Badge variant="destructive">
+                    {unreadCount} {unreadCount === 1 ? 'nepročitana poruka' : 'nepročitanih poruka'}
+                  </Badge>
+                </Button>
               )}
               <Button
                 variant="outline"
