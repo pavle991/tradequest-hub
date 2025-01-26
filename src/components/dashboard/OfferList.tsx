@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { SellerRating } from "./SellerRating"
 import { InquiryChat } from "./InquiryChat"
 import { supabase } from "@/integrations/supabase/client"
@@ -28,9 +27,13 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
   const [offers, setOffers] = useState<Offer[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null)
+  const [isBuyer, setIsBuyer] = useState(false)
+  const [hasMessages, setHasMessages] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     fetchOffers()
+    checkIfUserIsBuyer()
+    checkForMessages()
   }, [inquiryId])
 
   const fetchOffers = async () => {
@@ -53,6 +56,38 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
       console.error('Error fetching offers:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const checkIfUserIsBuyer = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: inquiry } = await supabase
+        .from('inquiries')
+        .select('user_id')
+        .eq('id', inquiryId)
+        .single()
+
+      setIsBuyer(inquiry?.user_id === user.id)
+    } catch (error) {
+      console.error('Error checking user role:', error)
+    }
+  }
+
+  const checkForMessages = async () => {
+    try {
+      const { data: messages } = await supabase
+        .from('messages')
+        .select('inquiry_id')
+        .eq('inquiry_id', inquiryId)
+
+      if (messages && messages.length > 0) {
+        setHasMessages({ [inquiryId]: true })
+      }
+    } catch (error) {
+      console.error('Error checking messages:', error)
     }
   }
 
@@ -82,19 +117,21 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
               </p>
             </div>
             <div>
-              {selectedOfferId === offer.id ? (
-                <InquiryChat
-                  inquiryId={inquiryId}
-                  inquiryTitle={inquiryTitle}
-                  onClose={() => setSelectedOfferId(null)}
-                />
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedOfferId(offer.id)}
-                >
-                  Započni razgovor
-                </Button>
+              {(isBuyer || hasMessages[inquiryId]) && (
+                selectedOfferId === offer.id ? (
+                  <InquiryChat
+                    inquiryId={inquiryId}
+                    inquiryTitle={inquiryTitle}
+                    onClose={() => setSelectedOfferId(null)}
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedOfferId(offer.id)}
+                  >
+                    Započni razgovor
+                  </Button>
+                )
               )}
             </div>
           </div>
