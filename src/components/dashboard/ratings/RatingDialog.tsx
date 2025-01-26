@@ -1,15 +1,22 @@
 import { useState } from "react"
 import { Star } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+
+type RatingParameter = {
+  id: string
+  label: string
+  value: number
+}
 
 type RatingDialogProps = {
   open: boolean
@@ -17,7 +24,6 @@ type RatingDialogProps = {
   invoiceId: string
   sellerId: string
   buyerId: string
-  onRatingSubmitted: () => void
 }
 
 export const RatingDialog = ({
@@ -25,19 +31,36 @@ export const RatingDialog = ({
   onOpenChange,
   invoiceId,
   sellerId,
-  buyerId,
-  onRatingSubmitted
+  buyerId
 }: RatingDialogProps) => {
-  const [rating, setRating] = useState(0)
+  const [parameters, setParameters] = useState<RatingParameter[]>([
+    { id: 'quality', label: 'Kvalitet usluge', value: 0 },
+    { id: 'communication', label: 'Komunikacija', value: 0 },
+    { id: 'professionalism', label: 'Profesionalnost', value: 0 },
+    { id: 'timeliness', label: 'Poštovanje rokova', value: 0 },
+  ])
   const [comment, setComment] = useState("")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
+  const handleRatingChange = (parameterId: string, value: number) => {
+    setParameters(prev => 
+      prev.map(param => 
+        param.id === parameterId ? { ...param, value } : param
+      )
+    )
+  }
+
+  const calculateAverageRating = () => {
+    const sum = parameters.reduce((acc, param) => acc + param.value, 0)
+    return sum / parameters.length
+  }
+
   const handleSubmit = async () => {
-    if (rating === 0) {
+    if (parameters.some(param => param.value === 0)) {
       toast({
         title: "Greška",
-        description: "Molimo vas da dodelite ocenu",
+        description: "Molimo vas da ocenite sve parametre",
         variant: "destructive",
       })
       return
@@ -46,25 +69,26 @@ export const RatingDialog = ({
     try {
       setLoading(true)
       
-      // Submit buyer's rating for seller
-      const { error: sellerRatingError } = await supabase
+      const averageRating = calculateAverageRating()
+      
+      const { error: ratingError } = await supabase
         .from('ratings')
         .insert({
           rater_id: buyerId,
           rated_id: sellerId,
           invoice_id: invoiceId,
-          rating,
-          comment
+          rating: averageRating,
+          comment: comment,
+          parameters: parameters
         })
 
-      if (sellerRatingError) throw sellerRatingError
+      if (ratingError) throw ratingError
 
       toast({
         title: "Uspešno",
-        description: "Ocena je uspešno dodata",
+        description: "Hvala vam na oceni!",
       })
       
-      onRatingSubmitted()
       onOpenChange(false)
     } catch (error) {
       console.error('Error submitting rating:', error)
@@ -78,35 +102,50 @@ export const RatingDialog = ({
     }
   }
 
+  const renderStars = (parameterId: string, currentValue: number) => (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((value) => (
+        <button
+          key={value}
+          onClick={() => handleRatingChange(parameterId, value)}
+          className="focus:outline-none"
+        >
+          <Star
+            className={`w-6 h-6 ${
+              value <= currentValue
+                ? "text-yellow-400 fill-yellow-400"
+                : "text-gray-300"
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Ocenite prodavca</DialogTitle>
+          <DialogDescription>
+            Vaše mišljenje nam je važno. Molimo vas da ocenite sledeće parametre.
+          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="flex justify-center gap-2">
-            {[1, 2, 3, 4, 5].map((value) => (
-              <button
-                key={value}
-                onClick={() => setRating(value)}
-                className="focus:outline-none"
-              >
-                <Star
-                  className={`w-8 h-8 ${
-                    value <= rating
-                      ? "text-yellow-400 fill-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              </button>
-            ))}
+        <div className="space-y-6 py-4">
+          {parameters.map((param) => (
+            <div key={param.id} className="space-y-2">
+              <label className="text-sm font-medium">{param.label}</label>
+              {renderStars(param.id, param.value)}
+            </div>
+          ))}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Komentar (opciono)</label>
+            <Textarea
+              placeholder="Dodajte komentar..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
           </div>
-          <Textarea
-            placeholder="Dodajte komentar (opciono)"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
           <Button 
             onClick={handleSubmit} 
             className="w-full"

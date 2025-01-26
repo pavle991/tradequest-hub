@@ -77,9 +77,13 @@ export const InvoiceVerificationDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Verifikacija fakture</DialogTitle>
+          <DialogTitle>
+            {invoice?.status === 'verified' ? 'Pregled fakture' : 'Verifikacija fakture'}
+          </DialogTitle>
           <DialogDescription>
-            Pregledajte i verifikujte fakturu
+            {invoice?.status === 'verified' 
+              ? 'Pregled verifikovane fakture'
+              : 'Pregledajte i verifikujte fakturu'}
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">

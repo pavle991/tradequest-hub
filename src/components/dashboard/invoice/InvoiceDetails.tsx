@@ -1,8 +1,6 @@
-import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { RatingDialog } from "../ratings/RatingDialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
@@ -17,7 +15,6 @@ export const InvoiceDetails = ({
   invoiceItems,
   onVerify 
 }: InvoiceDetailsProps) => {
-  const [showRating, setShowRating] = useState(false)
   const { toast } = useToast()
 
   if (!invoice) {
@@ -38,7 +35,6 @@ export const InvoiceDetails = ({
         description: "Faktura je verifikovana",
       })
       
-      setShowRating(true)
       onVerify()
     } catch (error) {
       console.error('Error verifying invoice:', error)
@@ -83,34 +79,18 @@ export const InvoiceDetails = ({
         <p className="font-semibold">Ukupno sa PDV-om: {invoice.total_with_vat} RSD</p>
       </div>
 
-      {invoice.status === 'pending' && (
+      {invoice.status === 'pending' ? (
         <Button 
           className="w-full" 
           onClick={handleVerify}
         >
           Verifikuj fakturu
         </Button>
-      )}
-      {invoice.status === 'verified' && (
+      ) : (
         <Badge className="w-full flex justify-center py-2">
           Faktura je verifikovana
         </Badge>
       )}
-
-      <RatingDialog
-        open={showRating}
-        onOpenChange={setShowRating}
-        invoiceId={invoice.id}
-        sellerId={invoice.seller_id}
-        buyerId={invoice.buyer_id}
-        onRatingSubmitted={() => {
-          setShowRating(false)
-          toast({
-            title: "Uspešno",
-            description: "Hvala vam na oceni!",
-          })
-        }}
-      />
     </div>
   )
 }
