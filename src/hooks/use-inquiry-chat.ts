@@ -18,17 +18,12 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         if (user) {
           setUserId(user.id)
           
-          const { data: inquiry, error } = await supabase
+          const { data: inquiry } = await supabase
             .from('inquiries')
             .select('user_id')
             .eq('id', inquiryId)
             .maybeSingle()
           
-          if (error) {
-            console.error('Error fetching inquiry:', error)
-            return
-          }
-
           setIsBuyer(inquiry?.user_id === user.id)
         }
       } catch (error) {
@@ -58,7 +53,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
               .eq('id', newMessage.sender_id)
               .single()
 
-            setMessages(prev => [...(prev || []), {
+            const formattedMessage = {
               id: newMessage.id,
               sender: newMessage.sender_id === userId ? 'Kupac' : senderProfile?.company_name || 'Prodavac',
               content: newMessage.content,
@@ -67,9 +62,11 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
                 minute: '2-digit' 
               }),
               status: newMessage.status as 'delivered' | 'read'
-            }])
+            }
+
+            setMessages(prev => [...prev, formattedMessage])
           } else if (payload.eventType === 'UPDATE') {
-            setMessages(prev => (prev || []).map(msg => 
+            setMessages(prev => prev.map(msg => 
               msg.id === payload.new.id 
                 ? { ...msg, status: payload.new.status as 'delivered' | 'read' }
                 : msg
@@ -101,12 +98,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         query.eq('offer_id', offerId)
       }
 
-      const { data: existingMessages, error } = await query
-
-      if (error) {
-        console.error('Error loading messages:', error)
-        return
-      }
+      const { data: existingMessages } = await query
 
       if (existingMessages) {
         const formattedMessages = existingMessages.map(msg => ({
@@ -138,20 +130,33 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         ...(offerId && { offer_id: offerId })
       }
 
+      // Optimistically add the message to the UI
+      const optimisticMessage = {
+        id: crypto.randomUUID(),
+        sender: isBuyer ? 'Kupac' : 'Prodavac',
+        content: newMessage,
+        timestamp: new Date().toLocaleTimeString('sr-RS', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        status: 'delivered' as const
+      }
+      setMessages(prev => [...prev, optimisticMessage])
+      setNewMessage("")
+
       const { error } = await supabase
         .from('messages')
         .insert(messageData)
 
       if (error) {
+        // Remove the optimistic message if there was an error
+        setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id))
         toast({
           title: "Greška",
           description: "Nije moguće poslati poruku. Pokušajte ponovo.",
           variant: "destructive"
         })
-        return
       }
-
-      setNewMessage("")
     } catch (error) {
       toast({
         title: "Greška",
