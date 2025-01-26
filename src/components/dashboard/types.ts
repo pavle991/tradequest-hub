@@ -25,4 +25,5 @@ export type Inquiry = {
   status: string
   date: string
   type: "buying" | "selling"
+  tags: string[]
 }

@@ -15,6 +15,7 @@ export type Database = {
           description: string
           id: string
           status: string
+          tags: string[] | null
           title: string
           type: string
           updated_at: string
@@ -25,6 +26,7 @@ export type Database = {
           description: string
           id?: string
           status?: string
+          tags?: string[] | null
           title: string
           type: string
           updated_at?: string
@@ -35,6 +37,7 @@ export type Database = {
           description?: string
           id?: string
           status?: string
+          tags?: string[] | null
           title?: string
           type?: string
           updated_at?: string
@@ -165,6 +168,7 @@ export type Database = {
           postal_code: string | null
           preferred_communication: string | null
           region: string | null
+          tags: string[] | null
           updated_at: string
           website: string | null
           working_hours: string | null
@@ -190,6 +194,7 @@ export type Database = {
           postal_code?: string | null
           preferred_communication?: string | null
           region?: string | null
+          tags?: string[] | null
           updated_at?: string
           website?: string | null
           working_hours?: string | null
@@ -215,6 +220,7 @@ export type Database = {
           postal_code?: string | null
           preferred_communication?: string | null
           region?: string | null
+          tags?: string[] | null
           updated_at?: string
           website?: string | null
           working_hours?: string | null
