@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { SellerRating } from "./SellerRating"
-import { InquiryChat } from "./InquiryChat"
 import { supabase } from "@/integrations/supabase/client"
+import { OfferCard } from "./offer/OfferCard"
+import { OfferListLoading } from "./offer/OfferListLoading"
+import { EmptyOfferList } from "./offer/EmptyOfferList"
 
 type Offer = {
   id: string
@@ -29,12 +28,10 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
   const [loading, setLoading] = useState(true)
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null)
   const [isBuyer, setIsBuyer] = useState(false)
-  const [hasMessages, setHasMessages] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     fetchOffers()
     checkIfUserIsBuyer()
-    checkForMessages()
   }, [inquiryId])
 
   const fetchOffers = async () => {
@@ -77,66 +74,26 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
     }
   }
 
-  const checkForMessages = async () => {
-    try {
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('inquiry_id')
-        .eq('inquiry_id', inquiryId)
-
-      if (messages && messages.length > 0) {
-        setHasMessages({ [inquiryId]: true })
-      }
-    } catch (error) {
-      console.error('Error checking messages:', error)
-    }
-  }
-
   if (loading) {
-    return <div>Učitavanje ponuda...</div>
+    return <OfferListLoading />
   }
 
   if (offers.length === 0) {
-    return <div>Još uvek nema ponuda.</div>
+    return <EmptyOfferList />
   }
 
   return (
     <div className="space-y-4">
       {offers.map((offer) => (
-        <Card key={offer.id} className="p-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-semibold">{offer.profiles.company_name}</h3>
-              <SellerRating
-                rating={offer.seller_rating}
-                numberOfRatings={offer.number_of_ratings}
-                totalSales={offer.total_sales}
-              />
-              <p className="mt-2">{offer.description}</p>
-              <p className="mt-2 font-semibold">
-                Cena: {offer.price.toLocaleString('sr-RS')} {offer.currency}
-              </p>
-            </div>
-            <div>
-              {isBuyer && (
-                selectedOfferId === offer.id ? (
-                  <InquiryChat
-                    inquiryId={inquiryId}
-                    inquiryTitle={inquiryTitle}
-                    onClose={() => setSelectedOfferId(null)}
-                  />
-                ) : (
-                  <Button
-                    variant="outline"
-                    onClick={() => setSelectedOfferId(offer.id)}
-                  >
-                    Započni razgovor
-                  </Button>
-                )
-              )}
-            </div>
-          </div>
-        </Card>
+        <OfferCard
+          key={offer.id}
+          offer={offer}
+          inquiryId={inquiryId}
+          inquiryTitle={inquiryTitle}
+          isBuyer={isBuyer}
+          selectedOfferId={selectedOfferId}
+          onSelectOffer={setSelectedOfferId}
+        />
       ))}
     </div>
   )
