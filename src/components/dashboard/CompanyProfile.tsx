@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { X } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 
@@ -17,7 +17,6 @@ type CompanyData = {
 }
 
 export const CompanyProfile = () => {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [companyData, setCompanyData] = useState<CompanyData>({
     company_name: "",
@@ -37,11 +36,7 @@ export const CompanyProfile = () => {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        toast({
-          title: "Greška",
-          description: "Niste prijavljeni",
-          variant: "destructive",
-        })
+        toast.error("Niste prijavljeni")
         return
       }
 
@@ -53,11 +48,7 @@ export const CompanyProfile = () => {
 
       if (error) {
         console.error('Error fetching profile:', error)
-        toast({
-          title: "Greška",
-          description: "Došlo je do greške prilikom učitavanja profila",
-          variant: "destructive",
-        })
+        toast.error("Došlo je do greške prilikom učitavanja profila")
         return
       }
 
@@ -67,16 +58,12 @@ export const CompanyProfile = () => {
           address: data.address || "",
           phone: data.phone || "",
           description: data.description || "",
-          tags: [] // We'll implement tags later
+          tags: data.tags || []
         })
       }
     } catch (error) {
       console.error('Error:', error)
-      toast({
-        title: "Greška",
-        description: "Došlo je do greške prilikom učitavanja profila",
-        variant: "destructive",
-      })
+      toast.error("Došlo je do greške prilikom učitavanja profila")
     } finally {
       setLoading(false)
     }
@@ -87,11 +74,7 @@ export const CompanyProfile = () => {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        toast({
-          title: "Greška",
-          description: "Niste prijavljeni",
-          variant: "destructive",
-        })
+        toast.error("Niste prijavljeni")
         return
       }
 
@@ -102,30 +85,20 @@ export const CompanyProfile = () => {
           address: companyData.address,
           phone: companyData.phone,
           description: companyData.description,
+          tags: companyData.tags
         })
         .eq('id', user.id)
 
       if (error) {
         console.error('Error updating profile:', error)
-        toast({
-          title: "Greška",
-          description: "Došlo je do greške prilikom čuvanja profila",
-          variant: "destructive",
-        })
+        toast.error("Došlo je do greške prilikom čuvanja profila")
         return
       }
 
-      toast({
-        title: "Uspešno",
-        description: "Podaci firme su ažurirani",
-      })
+      toast.success("Podaci firme su ažurirani")
     } catch (error) {
       console.error('Error:', error)
-      toast({
-        title: "Greška",
-        description: "Došlo je do greške prilikom čuvanja profila",
-        variant: "destructive",
-      })
+      toast.error("Došlo je do greške prilikom čuvanja profila")
     }
   }
 
