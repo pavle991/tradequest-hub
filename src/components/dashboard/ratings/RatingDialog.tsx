@@ -88,7 +88,7 @@ export const RatingDialog = ({
 
       toast({
         title: "Uspešno",
-        description: "Hvala vam na oceni!",
+        description: "Uspešno ste ocenili prodavca. Hvala vam na oceni!",
       })
       
       onOpenChange(false)
@@ -126,7 +126,7 @@ export const RatingDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ocenite prodavca</DialogTitle>
           <DialogDescription>
