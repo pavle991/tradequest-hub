@@ -10,9 +10,26 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for changes on auth state (sign in, sign out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -37,36 +54,53 @@ export const Navbar = () => {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder.svg" alt="Company Logo" />
-                    <AvatarFallback>
-                      <Building2 className="h-6 w-6" />
-                    </AvatarFallback>
-                  </Avatar>
+            {!user ? (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/register" className="flex items-center">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Registruj se
+                  </Link>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard" className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Podešavanja profila</span>
+                <Button variant="default" asChild>
+                  <Link to="/login" className="flex items-center">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Prijavi se
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard" className="flex items-center">
-                    <BarChart3 className="mr-2 h-4 w-4" />
-                    <span>Statistika</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Odjavi se</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </Button>
+              </>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src="/placeholder.svg" alt="Company Logo" />
+                      <AvatarFallback>
+                        <Building2 className="h-6 w-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Podešavanja profila</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center">
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      <span>Statistika</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Odjavi se</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
