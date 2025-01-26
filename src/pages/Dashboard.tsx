@@ -7,20 +7,12 @@ import { InquiryList } from "@/components/dashboard/InquiryList"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { CompanyProfileButton } from "@/components/layout/CompanyProfileButton"
-
-type Inquiry = {
-  id: number
-  title: string
-  description: string
-  status: string
-  date: string
-  type: "buying" | "selling"
-}
+import { type Inquiry } from "@/components/dashboard/types"
 
 const Dashboard = () => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([
     {
-      id: 1,
+      id: "1",
       title: "Potrebni kancelarijski materijali",
       description: "Tražimo ponudu za kopir papir A4, 80g, 500 listova - 100 kutija",
       status: "aktivan",
@@ -28,7 +20,7 @@ const Dashboard = () => {
       type: "buying"
     },
     {
-      id: 2,
+      id: "2",
       title: "Potrebna računarska oprema",
       description: "Tražimo ponude za nabavku 5 laptopova za poslovnu upotrebu. Minimalne specifikacije: i5 procesor, 16GB RAM, 512GB SSD",
       status: "aktivan",
@@ -40,7 +32,7 @@ const Dashboard = () => {
 
   const handleSubmitInquiry = (title: string, description: string, type: "buying" | "selling") => {
     const newInquiry: Inquiry = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       title,
       description,
       status: "aktivan",

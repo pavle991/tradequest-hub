@@ -6,18 +6,18 @@ import { SellerRating } from "./SellerRating"
 
 type ChatMessageProps = {
   message: {
-    id: number
+    id: string
     sender: string
     content: string
     timestamp: string
-    sellerId?: number
+    sellerId?: string
     sellerRating?: number
     totalSales?: number
     numberOfRatings?: number
     status?: 'delivered' | 'read'
   }
-  selectedSeller: number | null
-  onSelectSeller: (sellerId: number) => void
+  selectedSeller: string | null
+  onSelectSeller: (sellerId: string) => void
   onMarkAsRead: () => void
 }
 
