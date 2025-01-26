@@ -2,7 +2,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { OfferList } from "./OfferList"
+import { InquiryChat } from "./InquiryChat"
 import { type Inquiry } from "./types"
+import { useState } from "react"
+import { supabase } from "@/integrations/supabase/client"
 
 type InquiryCardProps = {
   inquiry: Inquiry
@@ -21,6 +24,35 @@ export const InquiryCard = ({
   onToggleOffers,
   onOpenOfferForm
 }: InquiryCardProps) => {
+  const [showChat, setShowChat] = useState(false)
+  const [hasExistingOffer, setHasExistingOffer] = useState(false)
+
+  // Check if the current seller has already made an offer
+  const checkExistingOffer = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: offers } = await supabase
+        .from('offers')
+        .select('id')
+        .eq('inquiry_id', inquiry.id)
+        .eq('seller_id', user.id)
+        .single()
+
+      setHasExistingOffer(!!offers)
+    } catch (error) {
+      console.error('Error checking existing offer:', error)
+    }
+  }
+
+  // Call checkExistingOffer when component mounts
+  useState(() => {
+    if (type === "selling") {
+      checkExistingOffer()
+    }
+  }, [inquiry.id, type])
+
   return (
     <Card key={inquiry.id} className="p-6">
       <div className="flex justify-between items-start">
@@ -36,9 +68,27 @@ export const InquiryCard = ({
           </div>
         </div>
         {type === "selling" ? (
-          <Button onClick={() => onOpenOfferForm(inquiry.id)}>
-            Pošalji ponudu
-          </Button>
+          <div className="flex flex-col gap-2">
+            {hasExistingOffer ? (
+              <>
+                {showChat ? (
+                  <InquiryChat
+                    inquiryId={inquiry.id}
+                    inquiryTitle={inquiry.title}
+                    onClose={() => setShowChat(false)}
+                  />
+                ) : (
+                  <Button onClick={() => setShowChat(true)}>
+                    Otvori chat
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button onClick={() => onOpenOfferForm(inquiry.id)}>
+                Pošalji ponudu
+              </Button>
+            )}
+          </div>
         ) : (
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-2">
