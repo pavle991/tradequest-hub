@@ -55,9 +55,10 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
+        // Za buying tab, prikaži samo upite trenutnog korisnika
         query = query.eq('user_id', user.id)
       } else {
-        // For selling tab, exclude inquiries created by current user
+        // Za selling tab, prikaži sve upite OSIM onih od trenutnog korisnika
         query = query.neq('user_id', user.id)
       }
 
