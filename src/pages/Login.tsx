@@ -38,13 +38,34 @@ const Login = () => {
         password: values.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message === "Email not confirmed") {
+          const { error: resendError } = await supabase.auth.resend({
+            type: 'signup',
+            email: values.email,
+          });
+          
+          if (resendError) {
+            toast.error("Došlo je do greške prilikom slanja verifikacionog emaila");
+          } else {
+            toast.error("Email nije verifikovan. Poslali smo vam novi verifikacioni email.");
+          }
+          return;
+        }
+        
+        if (error.message === "Invalid login credentials") {
+          toast.error("Pogrešan email ili lozinka");
+          return;
+        }
+        
+        throw error;
+      }
 
       toast.success("Uspešno ste se prijavili!");
       navigate("/dashboard");
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error(error.message || "Došlo je do greške prilikom prijave");
+      toast.error("Došlo je do greške prilikom prijave");
     } finally {
       setIsLoading(false);
     }
