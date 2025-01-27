@@ -50,21 +50,19 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       let activeQuery = supabase
         .from('inquiries')
         .select('*')
-        .eq('status', 'aktivan')  // This is already correct
+        .eq('status', 'active')  // Changed from 'aktivan' to 'active'
         .order('created_at', { ascending: false })
 
       let completedQuery = supabase
         .from('inquiries')
         .select('*')
-        .eq('status', 'završen')
+        .eq('status', 'completed')
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
-        // For buying tab, show user's own inquiries
         activeQuery = activeQuery.eq('user_id', user.id)
         completedQuery = completedQuery.eq('user_id', user.id)
       } else {
-        // For selling tab, only show active inquiries that match user's tags
         activeQuery = activeQuery.neq('user_id', user.id)
         completedQuery = completedQuery.neq('user_id', user.id)
       }
@@ -78,7 +76,6 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (completedResult.error) throw completedResult.error
 
       if (type === "selling" && userTags.length > 0) {
-        // Filter inquiries that have at least one matching tag with user's tags
         const filteredActive = (activeResult.data || []).filter(inquiry => 
           inquiry.tags?.some(tag => userTags.includes(tag))
         )
@@ -113,7 +110,6 @@ export const InquiryList = ({ type }: InquiryListProps) => {
 
   return (
     <div className="space-y-8">
-      {/* Active Inquiries Section */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Aktivni upiti</h2>
         {activeInquiries.length === 0 ? (
@@ -134,7 +130,6 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         )}
       </div>
 
-      {/* Completed Inquiries Section */}
       {type === "buying" && completedInquiries.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Završeni upiti</h2>

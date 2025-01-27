@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 
 export const useInquiryChat = (inquiryId: string, offerId?: string) => {
@@ -10,11 +10,11 @@ export const useInquiryChat = (inquiryId: string, offerId?: string) => {
   useEffect(() => {
     fetchMessages()
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('messages-changes')
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'messages',
           filter: `inquiry_id=eq.${inquiryId}`
@@ -35,22 +35,22 @@ export const useInquiryChat = (inquiryId: string, offerId?: string) => {
       const { data: messages, error } = await supabase
         .from('messages')
         .select(`
-          id,
-          content,
-          created_at,
-          sender_id,
-          status,
-          profiles(company_name)
+          *,
+          profiles:sender_id (
+            company_name
+          )
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
 
       if (error) throw error
 
-      setMessages(messages.map(message => ({
+      const formattedMessages = messages.map(message => ({
         ...message,
         company_name: message.profiles?.company_name
-      })))
+      }))
+
+      setMessages(formattedMessages)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching messages:', error)
