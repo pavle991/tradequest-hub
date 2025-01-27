@@ -95,9 +95,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
           created_at,
           sender_id,
           status,
-          sender:profiles!messages_sender_id_fkey (
-            company_name
-          )
+          sender:profiles(company_name)
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
