@@ -39,11 +39,9 @@ const Login = () => {
       });
 
       if (error) {
-        if (error.message === "Invalid login credentials") {
-          toast.error("Pogrešan email ili lozinka");
-          return;
-        }
-        throw error;
+        console.error('Login error:', error);
+        toast.error("Pogrešan email ili lozinka");
+        return;
       }
 
       toast.success("Uspešno ste se prijavili!");
