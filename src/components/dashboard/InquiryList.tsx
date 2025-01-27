@@ -36,7 +36,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .single()
 
       console.log('Profile tags from database:', profile?.tags)
-      if (profile?.tags) {
+      if (profile?.tags && Array.isArray(profile.tags)) {
         setProfileTags(profile.tags)
       }
     } catch (error) {
@@ -71,22 +71,27 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling" && inquiriesData) {
         // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
-          // Get tags from both inquiry and profile
-          const inquiryTags = inquiry.tags || []
+          // Ensure both tags arrays exist and are arrays
+          const inquiryTags = Array.isArray(inquiry.tags) ? inquiry.tags : []
           
           console.log(`Comparing tags for inquiry "${inquiry.title}":`)
           console.log('Inquiry tags:', inquiryTags)
           console.log('Profile tags:', profileTags)
           
-          // If either has no tags, don't show the inquiry
+          // Only filter if both arrays have tags
           if (inquiryTags.length === 0 || profileTags.length === 0) {
             console.log('No tags available for comparison')
             return false
           }
 
           // Convert all tags to lowercase for comparison
-          const normalizedInquiryTags = inquiryTags.map(tag => tag.toLowerCase().trim())
-          const normalizedProfileTags = profileTags.map(tag => tag.toLowerCase().trim())
+          const normalizedInquiryTags = inquiryTags.map(tag => 
+            typeof tag === 'string' ? tag.toLowerCase().trim() : ''
+          ).filter(tag => tag !== '')
+
+          const normalizedProfileTags = profileTags.map(tag => 
+            typeof tag === 'string' ? tag.toLowerCase().trim() : ''
+          ).filter(tag => tag !== '')
 
           // Check if any tags match
           const hasMatchingTag = normalizedInquiryTags.some(tag => 
@@ -97,9 +102,17 @@ export const InquiryList = ({ type }: InquiryListProps) => {
           return hasMatchingTag
         })
 
-        setInquiries(filteredInquiries)
-      } else {
-        setInquiries(inquiriesData || [])
+        // Ensure type safety by casting the filtered inquiries
+        setInquiries(filteredInquiries.map(inquiry => ({
+          ...inquiry,
+          type: inquiry.type as "buying" | "selling"
+        })))
+      } else if (inquiriesData) {
+        // Ensure type safety for non-filtered inquiries
+        setInquiries(inquiriesData.map(inquiry => ({
+          ...inquiry,
+          type: inquiry.type as "buying" | "selling"
+        })))
       }
     } catch (error) {
       console.error('Error fetching inquiries:', error)
