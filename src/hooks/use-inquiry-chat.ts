@@ -3,6 +3,10 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { type Message } from "@/components/dashboard/types"
 
+type Profile = {
+  company_name: string
+}
+
 export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
@@ -51,20 +55,22 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
               .from('profiles')
               .select('company_name')
               .eq('id', newMessage.sender_id)
-              .single()
+              .maybeSingle()
 
-            const formattedMessage = {
-              id: newMessage.id,
-              sender: newMessage.sender_id === userId ? 'Kupac' : senderProfile?.company_name || 'Prodavac',
-              content: newMessage.content,
-              timestamp: new Date(newMessage.created_at).toLocaleTimeString('sr-RS', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              }),
-              status: newMessage.status as 'delivered' | 'read'
+            if (senderProfile) {
+              const formattedMessage = {
+                id: newMessage.id,
+                sender: newMessage.sender_id === userId ? 'Kupac' : senderProfile.company_name || 'Prodavac',
+                content: newMessage.content,
+                timestamp: new Date(newMessage.created_at).toLocaleTimeString('sr-RS', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                }),
+                status: newMessage.status as 'delivered' | 'read'
+              }
+
+              setMessages(prev => [...prev, formattedMessage])
             }
-
-            setMessages(prev => [...prev, formattedMessage])
           } else if (payload.eventType === 'UPDATE') {
             setMessages(prev => prev.map(msg => 
               msg.id === payload.new.id 
