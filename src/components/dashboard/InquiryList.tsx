@@ -3,7 +3,6 @@ import { InquiryCard } from "./InquiryCard"
 import { type Inquiry } from "./types"
 import { supabase } from "@/integrations/supabase/client"
 import { EmptyInquiryState } from "./EmptyInquiryState"
-import { SuccessfulDeals } from "./SuccessfulDeals"
 import { Card } from "@/components/ui/card"
 
 type InquiryListProps = {
