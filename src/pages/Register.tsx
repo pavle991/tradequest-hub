@@ -106,31 +106,31 @@ const Register = () => {
         return;
       }
 
-      // Update profile information immediately after registration
+      // Create profile with all form data
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           id: authData.user.id,
           company_name: values.companyName,
-          company_number: values.companyNumber,
-          pib: values.pib,
+          company_number: values.companyNumber || null,
+          pib: values.pib || null,
           founding_year: values.foundingYear ? parseInt(values.foundingYear) : null,
-          website: values.website,
-          description: values.description,
-          contact_name: values.contactName,
-          contact_position: values.contactPosition,
-          phone: values.phone,
-          working_hours: values.workingHours,
-          address: values.address,
-          city: values.city,
-          postal_code: values.postalCode,
-          region: values.region,
-          linkedin: values.linkedin,
-          facebook: values.facebook,
-          instagram: values.instagram,
-          preferred_communication: values.preferredCommunication,
-          communication_language: values.communicationLanguage,
-          currency: values.currency,
+          website: values.website || null,
+          description: values.description || null,
+          contact_name: values.contactName || null,
+          contact_position: values.contactPosition || null,
+          phone: values.phone || null,
+          working_hours: values.workingHours || null,
+          address: values.address || null,
+          city: values.city || null,
+          postal_code: values.postalCode || null,
+          region: values.region || null,
+          linkedin: values.linkedin || null,
+          facebook: values.facebook || null,
+          instagram: values.instagram || null,
+          preferred_communication: values.preferredCommunication || null,
+          communication_language: values.communicationLanguage || null,
+          currency: values.currency || null,
           tags: tags,
         });
 
