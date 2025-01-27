@@ -91,23 +91,19 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
   const loadExistingMessages = async () => {
     try {
-      const query = supabase
+      const { data: messages, error } = await supabase
         .from('messages')
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey(company_name)
+          sender:profiles(company_name)
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
 
-      if (offerId) {
-        query.eq('offer_id', offerId)
-      }
+      if (error) throw error
 
-      const { data: existingMessages } = await query
-
-      if (existingMessages) {
-        const formattedMessages = existingMessages.map(msg => ({
+      if (messages) {
+        const formattedMessages = messages.map(msg => ({
           id: msg.id,
           sender: msg.sender_id === userId ? 'Kupac' : msg.sender.company_name || 'Prodavac',
           content: msg.content,
@@ -136,7 +132,6 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         ...(offerId && { offer_id: offerId })
       }
 
-      // Optimistically add the message to the UI
       const optimisticMessage = {
         id: crypto.randomUUID(),
         sender: isBuyer ? 'Kupac' : 'Prodavac',
@@ -155,7 +150,6 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         .insert(messageData)
 
       if (error) {
-        // Remove the optimistic message if there was an error
         setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id))
         toast({
           title: "Greška",
