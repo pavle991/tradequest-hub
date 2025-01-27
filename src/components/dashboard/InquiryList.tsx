@@ -50,7 +50,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       let activeQuery = supabase
         .from('inquiries')
         .select('*')
-        .eq('status', 'active')  // Changed from 'aktivan' to 'active'
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
 
       let completedQuery = supabase
@@ -63,6 +63,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         activeQuery = activeQuery.eq('user_id', user.id)
         completedQuery = completedQuery.eq('user_id', user.id)
       } else {
+        // For selling tab, first get all inquiries not created by the current user
         activeQuery = activeQuery.neq('user_id', user.id)
         completedQuery = completedQuery.neq('user_id', user.id)
       }
@@ -75,7 +76,8 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (activeResult.error) throw activeResult.error
       if (completedResult.error) throw completedResult.error
 
-      if (type === "selling" && userTags.length > 0) {
+      if (type === "selling") {
+        // Filter inquiries to only show those that have at least one matching tag with user's tags
         const filteredActive = (activeResult.data || []).filter(inquiry => 
           inquiry.tags?.some(tag => userTags.includes(tag))
         )
