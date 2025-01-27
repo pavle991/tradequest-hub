@@ -12,7 +12,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [userTags, setUserTags] = useState<string[]>([])
+  const [profileTags, setProfileTags] = useState<string[]>([])
 
   useEffect(() => {
     const init = async () => {
@@ -35,9 +35,9 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .eq('id', user.id)
         .single()
 
-      console.log('User profile tags:', profile?.tags)
+      console.log('Profile tags from database:', profile?.tags)
       if (profile?.tags) {
-        setUserTags(profile.tags)
+        setProfileTags(profile.tags)
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
@@ -65,38 +65,41 @@ export const InquiryList = ({ type }: InquiryListProps) => {
 
       if (error) throw error
 
-      console.log('All inquiries:', inquiriesData)
-      console.log('User tags for filtering:', userTags)
+      console.log('Fetched inquiries:', inquiriesData)
+      console.log('Current profile tags:', profileTags)
 
       if (type === "selling" && inquiriesData) {
-        // Filter inquiries to show only those with matching tags
+        // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
+          // Get tags from both inquiry and profile
           const inquiryTags = inquiry.tags || []
-          const profileTags = userTags || []
           
+          console.log(`Comparing tags for inquiry "${inquiry.title}":`)
+          console.log('Inquiry tags:', inquiryTags)
+          console.log('Profile tags:', profileTags)
+          
+          // If either has no tags, don't show the inquiry
           if (inquiryTags.length === 0 || profileTags.length === 0) {
-            console.log('No tags to compare for inquiry:', inquiry.title)
+            console.log('No tags available for comparison')
             return false
           }
-          
-          // Convert tags to lowercase for case-insensitive comparison
-          const inquiryTagsLower = inquiryTags.map(tag => tag.toLowerCase().trim())
-          const profileTagsLower = profileTags.map(tag => tag.toLowerCase().trim())
-          
-          // Check for any matching tags
-          const hasMatchingTag = inquiryTagsLower.some(tag => profileTagsLower.includes(tag))
-          
-          console.log('Inquiry:', inquiry.title, 
-            '\nInquiry tags:', inquiryTagsLower, 
-            '\nProfile tags:', profileTagsLower, 
-            '\nHas matching tag:', hasMatchingTag)
-          
+
+          // Convert all tags to lowercase for comparison
+          const normalizedInquiryTags = inquiryTags.map(tag => tag.toLowerCase().trim())
+          const normalizedProfileTags = profileTags.map(tag => tag.toLowerCase().trim())
+
+          // Check if any tags match
+          const hasMatchingTag = normalizedInquiryTags.some(tag => 
+            normalizedProfileTags.includes(tag)
+          )
+
+          console.log('Has matching tag:', hasMatchingTag)
           return hasMatchingTag
         })
-        
-        setInquiries(filteredInquiries as Inquiry[])
+
+        setInquiries(filteredInquiries)
       } else {
-        setInquiries(inquiriesData as Inquiry[] || [])
+        setInquiries(inquiriesData || [])
       }
     } catch (error) {
       console.error('Error fetching inquiries:', error)
