@@ -72,7 +72,6 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling" && inquiriesData) {
         // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
-          // Ensure both tags arrays exist and are arrays
           const inquiryTags = Array.isArray(inquiry.tags) ? inquiry.tags : []
           
           console.log(`Comparing tags for inquiry "${inquiry.title}":`)
@@ -103,13 +102,11 @@ export const InquiryList = ({ type }: InquiryListProps) => {
           return hasMatchingTag
         })
 
-        // Ensure type safety by casting the filtered inquiries
         setInquiries(filteredInquiries.map(inquiry => ({
           ...inquiry,
           type: inquiry.type as "buying" | "selling"
         })))
       } else if (inquiriesData) {
-        // Ensure type safety for non-filtered inquiries
         setInquiries(inquiriesData.map(inquiry => ({
           ...inquiry,
           type: inquiry.type as "buying" | "selling"
