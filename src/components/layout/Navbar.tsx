@@ -5,44 +5,40 @@ import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { AuthButtons } from "./AuthButtons";
 import { UserMenu } from "./UserMenu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Navbar = () => {
   const [user, setUser] = useState<User | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchCompanyProfile(session.user.id);
+        fetchCompanyName(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchCompanyProfile(session.user.id);
+        fetchCompanyName(session.user.id);
       } else {
         setCompanyName("");
-        setLogoUrl(null);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchCompanyProfile = async (userId: string) => {
+  const fetchCompanyName = async (userId: string) => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('company_name, logo_url')
+      .select('company_name')
       .eq('id', userId)
       .maybeSingle();
 
     if (!error && data) {
       setCompanyName(data.company_name);
-      setLogoUrl(data.logo_url);
     }
   };
 
@@ -58,15 +54,7 @@ export const Navbar = () => {
           </div>
           <div className="flex items-center space-x-4">
             {user && companyName && (
-              <div className="flex items-center space-x-3">
-                {logoUrl && (
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={logoUrl} alt={companyName} />
-                    <AvatarFallback>{companyName.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                )}
-                <span className="text-gray-700 font-medium">{companyName}</span>
-              </div>
+              <span className="text-gray-700 font-medium">{companyName}</span>
             )}
             {!user ? <AuthButtons /> : <UserMenu />}
           </div>
