@@ -58,7 +58,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "buying") {
         query = query.eq('user_id', user.id)
       } else {
-        // Za prodajni tab, isključujemo upite koje je kreirao trenutni korisnik
+        // For selling tab, exclude inquiries created by current user
         query = query.neq('user_id', user.id)
       }
 
@@ -70,28 +70,31 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       console.log('User tags for filtering:', userTags)
 
       if (type === "selling" && inquiriesData) {
-        // Filtriramo upite da prikažemo samo one koji imaju bar jedan zajednički tag sa korisnikovim tagovima
+        // Filter inquiries to show only those with matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
-          if (!inquiry.tags || !userTags || userTags.length === 0) return false
+          if (!inquiry.tags || !userTags || userTags.length === 0) {
+            console.log('No tags to compare for inquiry:', inquiry.title)
+            return false
+          }
           
-          // Konvertujemo sve tagove u mala slova za poređenje
+          // Convert tags to lowercase for case-insensitive comparison
           const inquiryTagsLower = inquiry.tags.map(tag => tag.toLowerCase().trim())
           const userTagsLower = userTags.map(tag => tag.toLowerCase().trim())
           
-          // Proveravamo da li postoji bar jedan zajednički tag
+          // Check for any matching tags
           const hasMatchingTag = inquiryTagsLower.some(tag => userTagsLower.includes(tag))
           
           console.log('Inquiry:', inquiry.title, 
-            'inquiry tags:', inquiryTagsLower, 
-            'user tags:', userTagsLower, 
-            'has matching tag:', hasMatchingTag)
+            '\nInquiry tags:', inquiryTagsLower, 
+            '\nUser tags:', userTagsLower, 
+            '\nHas matching tag:', hasMatchingTag)
           
           return hasMatchingTag
         })
         
-        setInquiries(filteredInquiries)
+        setInquiries(filteredInquiries as Inquiry[])
       } else {
-        setInquiries(inquiriesData || [])
+        setInquiries(inquiriesData as Inquiry[] || [])
       }
     } catch (error) {
       console.error('Error fetching inquiries:', error)
@@ -116,22 +119,16 @@ export const InquiryList = ({ type }: InquiryListProps) => {
     <div className="space-y-8">
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Upiti</h2>
-        {inquiries.length === 0 ? (
-          <Card className="p-4">
-            <p className="text-center text-gray-500">Trenutno nemate upita</p>
-          </Card>
-        ) : (
-          inquiries.map((inquiry) => (
-            <InquiryCard
-              key={inquiry.id}
-              inquiry={inquiry}
-              type={type}
-              selectedInquiryId={selectedInquiryId}
-              onToggleOffers={handleToggleOffers}
-              onOpenOfferForm={() => {}}
-            />
-          ))
-        )}
+        {inquiries.map((inquiry) => (
+          <InquiryCard
+            key={inquiry.id}
+            inquiry={inquiry}
+            type={type}
+            selectedInquiryId={selectedInquiryId}
+            onToggleOffers={handleToggleOffers}
+            onOpenOfferForm={() => {}}
+          />
+        ))}
       </div>
     </div>
   )
