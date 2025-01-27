@@ -3,7 +3,6 @@ import { InquiryCard } from "./InquiryCard"
 import { type Inquiry } from "./types"
 import { supabase } from "@/integrations/supabase/client"
 import { EmptyInquiryState } from "./EmptyInquiryState"
-import { Card } from "@/components/ui/card"
 
 type InquiryListProps = {
   type: "buying" | "selling"
@@ -72,21 +71,24 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling" && inquiriesData) {
         // Filter inquiries to show only those with matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
-          if (!inquiry.tags || !userTags || userTags.length === 0) {
+          const inquiryTags = inquiry.tags || []
+          const profileTags = userTags || []
+          
+          if (inquiryTags.length === 0 || profileTags.length === 0) {
             console.log('No tags to compare for inquiry:', inquiry.title)
             return false
           }
           
           // Convert tags to lowercase for case-insensitive comparison
-          const inquiryTagsLower = inquiry.tags.map(tag => tag.toLowerCase().trim())
-          const userTagsLower = userTags.map(tag => tag.toLowerCase().trim())
+          const inquiryTagsLower = inquiryTags.map(tag => tag.toLowerCase().trim())
+          const profileTagsLower = profileTags.map(tag => tag.toLowerCase().trim())
           
           // Check for any matching tags
-          const hasMatchingTag = inquiryTagsLower.some(tag => userTagsLower.includes(tag))
+          const hasMatchingTag = inquiryTagsLower.some(tag => profileTagsLower.includes(tag))
           
           console.log('Inquiry:', inquiry.title, 
             '\nInquiry tags:', inquiryTagsLower, 
-            '\nUser tags:', userTagsLower, 
+            '\nProfile tags:', profileTagsLower, 
             '\nHas matching tag:', hasMatchingTag)
           
           return hasMatchingTag
