@@ -1,8 +1,21 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 
+type MessageWithSender = {
+  id: string
+  inquiry_id: string
+  sender_id: string
+  content: string
+  created_at: string
+  status: 'delivered' | 'read'
+  offer_id: string | null
+  sender: {
+    company_name: string
+  } | null
+}
+
 export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
-  const [messages, setMessages] = useState<any[]>([])
+  const [messages, setMessages] = useState<MessageWithSender[]>([])
   const [loading, setLoading] = useState(true)
   const [newMessage, setNewMessage] = useState("")
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
