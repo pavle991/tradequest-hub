@@ -51,10 +51,9 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      let activeQuery = supabase
+      let query = supabase
         .from('inquiries')
         .select('*')
-        .eq('status', 'active')
         .order('created_at', { ascending: false })
 
       let completedQuery = supabase
@@ -64,23 +63,23 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
-        activeQuery = activeQuery.eq('user_id', user.id)
+        query = query.eq('user_id', user.id)
         completedQuery = completedQuery.eq('user_id', user.id)
       } else {
         // For selling tab, exclude inquiries created by the current user
-        activeQuery = activeQuery.neq('user_id', user.id)
+        query = query.neq('user_id', user.id)
         completedQuery = completedQuery.neq('user_id', user.id)
       }
 
       const [activeResult, completedResult] = await Promise.all([
-        activeQuery,
+        query,
         completedQuery
       ])
 
       if (activeResult.error) throw activeResult.error
       if (completedResult.error) throw completedResult.error
 
-      console.log('All active inquiries:', activeResult.data)
+      console.log('All inquiries:', activeResult.data)
       console.log('User tags for filtering:', userTags)
 
       if (type === "selling") {
@@ -141,10 +140,10 @@ export const InquiryList = ({ type }: InquiryListProps) => {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Aktivni upiti</h2>
+        <h2 className="text-xl font-semibold">Upiti</h2>
         {activeInquiries.length === 0 ? (
           <Card className="p-4">
-            <p className="text-center text-gray-500">Trenutno nemate aktivnih upita</p>
+            <p className="text-center text-gray-500">Trenutno nemate upita</p>
           </Card>
         ) : (
           activeInquiries.map((inquiry) => (
