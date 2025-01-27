@@ -106,10 +106,13 @@ const Register = () => {
         return;
       }
 
+      // Wait a moment for the auth state to be fully initialized
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Create profile with all form data
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({
+        .insert({
           id: authData.user.id,
           company_name: values.companyName,
           company_number: values.companyNumber || null,
@@ -137,6 +140,9 @@ const Register = () => {
       if (profileError) {
         console.error('Profile update error:', profileError);
         toast.error("Greška pri ažuriranju profila");
+        
+        // If profile creation fails, we should clean up by deleting the auth user
+        await supabase.auth.signOut();
         return;
       }
 
