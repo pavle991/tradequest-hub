@@ -3,10 +3,6 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { type Message } from "@/components/dashboard/types"
 
-type Profile = {
-  company_name: string
-}
-
 export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
@@ -55,7 +51,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
               .from('profiles')
               .select('company_name')
               .eq('id', newMessage.sender_id)
-              .maybeSingle()
+              .single()
 
             if (senderProfile) {
               const formattedMessage = {
@@ -91,19 +87,25 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
   const loadExistingMessages = async () => {
     try {
-      const { data: messages, error } = await supabase
+      const { data: messagesData, error } = await supabase
         .from('messages')
         .select(`
-          *,
-          sender:profiles(company_name)
+          id,
+          content,
+          created_at,
+          sender_id,
+          status,
+          sender:profiles!messages_sender_id_fkey (
+            company_name
+          )
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
 
       if (error) throw error
 
-      if (messages) {
-        const formattedMessages = messages.map(msg => ({
+      if (messagesData) {
+        const formattedMessages = messagesData.map(msg => ({
           id: msg.id,
           sender: msg.sender_id === userId ? 'Kupac' : msg.sender.company_name || 'Prodavac',
           content: msg.content,
