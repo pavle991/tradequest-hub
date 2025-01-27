@@ -50,7 +50,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       let activeQuery = supabase
         .from('inquiries')
         .select('*')
-        .eq('status', 'aktivan')
+        .eq('status', 'aktivan')  // This is already correct
         .order('created_at', { ascending: false })
 
       let completedQuery = supabase
