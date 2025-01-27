@@ -87,8 +87,8 @@ const Register = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      
-      // Register user with Supabase Auth
+
+      // 1. First register the user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -106,42 +106,39 @@ const Register = () => {
         return;
       }
 
-      // Wait a moment for the auth state to be fully initialized
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Create profile with all form data
+      // 2. Update the profile with all the form data
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
-          id: authData.user.id,
+        .update({
           company_name: values.companyName,
-          company_number: values.companyNumber || null,
-          pib: values.pib || null,
+          company_number: values.companyNumber,
+          pib: values.pib,
           founding_year: values.foundingYear ? parseInt(values.foundingYear) : null,
-          website: values.website || null,
-          description: values.description || null,
-          contact_name: values.contactName || null,
-          contact_position: values.contactPosition || null,
-          phone: values.phone || null,
-          working_hours: values.workingHours || null,
-          address: values.address || null,
-          city: values.city || null,
-          postal_code: values.postalCode || null,
-          region: values.region || null,
-          linkedin: values.linkedin || null,
-          facebook: values.facebook || null,
-          instagram: values.instagram || null,
-          preferred_communication: values.preferredCommunication || null,
-          communication_language: values.communicationLanguage || null,
-          currency: values.currency || null,
+          website: values.website,
+          description: values.description,
+          contact_name: values.contactName,
+          contact_position: values.contactPosition,
+          phone: values.phone,
+          working_hours: values.workingHours,
+          address: values.address,
+          city: values.city,
+          postal_code: values.postalCode,
+          region: values.region,
+          linkedin: values.linkedin,
+          facebook: values.facebook,
+          instagram: values.instagram,
+          preferred_communication: values.preferredCommunication,
+          communication_language: values.communicationLanguage,
+          currency: values.currency,
           tags: tags,
-        });
+        })
+        .eq('id', authData.user.id);
 
       if (profileError) {
         console.error('Profile update error:', profileError);
         toast.error("Greška pri ažuriranju profila");
         
-        // If profile creation fails, we should clean up by deleting the auth user
+        // Clean up by signing out if profile update fails
         await supabase.auth.signOut();
         return;
       }
