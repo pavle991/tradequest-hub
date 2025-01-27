@@ -15,35 +15,32 @@ export const InquiryList = ({ type }: InquiryListProps) => {
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [userTags, setUserTags] = useState<string[]>([])
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setCurrentUserId(user.id)
-        if (type === "selling") {
-          await fetchUserProfile(user.id)
-        }
+      if (type === "selling") {
+        await fetchUserProfile()
       }
       await fetchInquiries()
     }
     init()
   }, [type])
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async () => {
     try {
-      const { data: profile, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: profile } = await supabase
         .from('profiles')
         .select('tags')
-        .eq('id', userId)
+        .eq('id', user.id)
         .single()
 
       console.log('User profile tags:', profile?.tags)
       if (profile?.tags) {
         setUserTags(profile.tags)
       }
-      if (error) throw error
     } catch (error) {
       console.error('Error fetching user profile:', error)
     }
@@ -51,6 +48,9 @@ export const InquiryList = ({ type }: InquiryListProps) => {
 
   const fetchInquiries = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
       let activeQuery = supabase
         .from('inquiries')
         .select('*')
@@ -64,13 +64,12 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
-        // For buying tab, show only user's own inquiries
-        activeQuery = activeQuery.eq('user_id', currentUserId)
-        completedQuery = completedQuery.eq('user_id', currentUserId)
+        activeQuery = activeQuery.eq('user_id', user.id)
+        completedQuery = completedQuery.eq('user_id', user.id)
       } else {
-        // For selling tab, show inquiries from other users that match tags
-        activeQuery = activeQuery.neq('user_id', currentUserId)
-        completedQuery = completedQuery.neq('user_id', currentUserId)
+        // For selling tab, exclude inquiries created by the current user
+        activeQuery = activeQuery.neq('user_id', user.id)
+        completedQuery = completedQuery.neq('user_id', user.id)
       }
 
       const [activeResult, completedResult] = await Promise.all([
@@ -87,7 +86,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling") {
         // Filter inquiries to only show those that have at least one matching tag with user's tags
         const filteredActive = (activeResult.data || []).filter(inquiry => {
-          if (!inquiry.tags || !userTags || userTags.length === 0) return false
+          if (!inquiry.tags || !userTags) return false
           
           // Convert all tags to lowercase for comparison
           const inquiryTagsLower = inquiry.tags.map(tag => tag.toLowerCase().trim())
@@ -107,7 +106,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         setActiveInquiries(filteredActive as Inquiry[])
 
         const filteredCompleted = (completedResult.data || []).filter(inquiry => {
-          if (!inquiry.tags || !userTags || userTags.length === 0) return false
+          if (!inquiry.tags || !userTags) return false
           
           const inquiryTagsLower = inquiry.tags.map(tag => tag.toLowerCase().trim())
           const userTagsLower = userTags.map(tag => tag.toLowerCase().trim())
