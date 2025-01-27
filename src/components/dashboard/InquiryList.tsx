@@ -17,10 +17,13 @@ export const InquiryList = ({ type }: InquiryListProps) => {
   const [userTags, setUserTags] = useState<string[]>([])
 
   useEffect(() => {
-    if (type === "selling") {
-      fetchUserProfile()
+    const init = async () => {
+      if (type === "selling") {
+        await fetchUserProfile()
+      }
+      await fetchInquiries()
     }
-    fetchInquiries()
+    init()
   }, [type])
 
   const fetchUserProfile = async () => {
@@ -83,22 +86,34 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling") {
         // Filter inquiries to only show those that have at least one matching tag with user's tags
         const filteredActive = (activeResult.data || []).filter(inquiry => {
-          if (!inquiry.tags || !userTags || userTags.length === 0) {
-            return false
-          }
-          const hasMatchingTag = inquiry.tags.some(tag => 
-            userTags.some(userTag => userTag.toLowerCase() === tag.toLowerCase())
-          )
-          console.log('Inquiry:', inquiry.title, 'tags:', inquiry.tags, 'has matching tag:', hasMatchingTag)
+          if (!inquiry.tags || !userTags) return false
+          
+          // Convert all tags to lowercase for comparison
+          const inquiryTagsLower = inquiry.tags.map(tag => tag.toLowerCase().trim())
+          const userTagsLower = userTags.map(tag => tag.toLowerCase().trim())
+          
+          // Check if there's any matching tag
+          const hasMatchingTag = inquiryTagsLower.some(tag => userTagsLower.includes(tag))
+          
+          console.log('Inquiry:', inquiry.title, 
+            'inquiry tags:', inquiryTagsLower, 
+            'user tags:', userTagsLower, 
+            'has matching tag:', hasMatchingTag)
+          
           return hasMatchingTag
         })
+        
         setActiveInquiries(filteredActive as Inquiry[])
 
-        const filteredCompleted = (completedResult.data || []).filter(inquiry => 
-          inquiry.tags?.some(tag => 
-            userTags.some(userTag => userTag.toLowerCase() === tag.toLowerCase())
-          )
-        )
+        const filteredCompleted = (completedResult.data || []).filter(inquiry => {
+          if (!inquiry.tags || !userTags) return false
+          
+          const inquiryTagsLower = inquiry.tags.map(tag => tag.toLowerCase().trim())
+          const userTagsLower = userTags.map(tag => tag.toLowerCase().trim())
+          
+          return inquiryTagsLower.some(tag => userTagsLower.includes(tag))
+        })
+        
         setCompletedInquiries(filteredCompleted as Inquiry[])
       } else {
         setActiveInquiries(activeResult.data as Inquiry[] || [])
