@@ -39,25 +39,10 @@ const Login = () => {
       });
 
       if (error) {
-        if (error.message === "Email not confirmed") {
-          const { error: resendError } = await supabase.auth.resend({
-            type: 'signup',
-            email: values.email,
-          });
-          
-          if (resendError) {
-            toast.error("Došlo je do greške prilikom slanja verifikacionog emaila");
-          } else {
-            toast.error("Email nije verifikovan. Poslali smo vam novi verifikacioni email.");
-          }
-          return;
-        }
-        
         if (error.message === "Invalid login credentials") {
           toast.error("Pogrešan email ili lozinka");
           return;
         }
-        
         throw error;
       }
 
