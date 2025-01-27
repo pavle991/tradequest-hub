@@ -34,6 +34,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .eq('id', user.id)
         .single()
 
+      console.log('User profile tags:', profile?.tags)
       if (profile?.tags) {
         setUserTags(profile.tags)
       }
@@ -76,11 +77,16 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (activeResult.error) throw activeResult.error
       if (completedResult.error) throw completedResult.error
 
+      console.log('All active inquiries:', activeResult.data)
+      console.log('User tags for filtering:', userTags)
+
       if (type === "selling") {
         // Filter inquiries to only show those that have at least one matching tag with user's tags
-        const filteredActive = (activeResult.data || []).filter(inquiry => 
-          inquiry.tags?.some(tag => userTags.includes(tag))
-        )
+        const filteredActive = (activeResult.data || []).filter(inquiry => {
+          const hasMatchingTag = inquiry.tags?.some(tag => userTags.includes(tag))
+          console.log('Inquiry:', inquiry.title, 'tags:', inquiry.tags, 'has matching tag:', hasMatchingTag)
+          return hasMatchingTag
+        })
         setActiveInquiries(filteredActive as Inquiry[])
 
         const filteredCompleted = (completedResult.data || []).filter(inquiry => 

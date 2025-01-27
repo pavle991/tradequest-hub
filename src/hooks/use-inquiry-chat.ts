@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 
-export const useInquiryChat = (inquiryId: string, offerId?: string) => {
+export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
   const [messages, setMessages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [newMessage, setNewMessage] = useState("")
+  const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
 
   useEffect(() => {
     fetchMessages()
@@ -34,7 +36,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string) => {
         .from('messages')
         .select(`
           *,
-          sender:sender_id (
+          sender:profiles!messages_sender_id_fkey (
             company_name
           )
         `)
@@ -56,10 +58,12 @@ export const useInquiryChat = (inquiryId: string, offerId?: string) => {
     }
   }
 
-  const sendMessage = async (content: string) => {
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No user found')
+      if (!user) return
 
       const { error } = await supabase
         .from('messages')
@@ -67,19 +71,43 @@ export const useInquiryChat = (inquiryId: string, offerId?: string) => {
           inquiry_id: inquiryId,
           offer_id: offerId,
           sender_id: user.id,
-          content
+          content: newMessage
         })
 
       if (error) throw error
+      setNewMessage("")
+      await fetchMessages()
     } catch (error) {
       console.error('Error sending message:', error)
-      throw error
+    }
+  }
+
+  const handleMarkAsRead = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('messages')
+        .update({ status: 'read' })
+        .eq('inquiry_id', inquiryId)
+        .eq('status', 'delivered')
+        .neq('sender_id', user.id)
+
+      if (error) throw error
+    } catch (error) {
+      console.error('Error marking messages as read:', error)
     }
   }
 
   return {
     messages,
     loading,
-    sendMessage
+    newMessage,
+    selectedSeller,
+    setNewMessage,
+    setSelectedSeller,
+    handleSendMessage,
+    handleMarkAsRead
   }
 }
