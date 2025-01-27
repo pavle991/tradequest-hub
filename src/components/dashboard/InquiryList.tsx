@@ -17,10 +17,10 @@ export const InquiryList = ({ type }: InquiryListProps) => {
   const [userTags, setUserTags] = useState<string[]>([])
 
   useEffect(() => {
-    fetchInquiries()
     if (type === "selling") {
       fetchUserProfile()
     }
+    fetchInquiries()
   }, [type])
 
   const fetchUserProfile = async () => {
@@ -64,7 +64,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         activeQuery = activeQuery.eq('user_id', user.id)
         completedQuery = completedQuery.eq('user_id', user.id)
       } else {
-        // For selling tab, first get all inquiries not created by the current user
+        // For selling tab, exclude inquiries created by the current user
         activeQuery = activeQuery.neq('user_id', user.id)
         completedQuery = completedQuery.neq('user_id', user.id)
       }
@@ -83,14 +83,21 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling") {
         // Filter inquiries to only show those that have at least one matching tag with user's tags
         const filteredActive = (activeResult.data || []).filter(inquiry => {
-          const hasMatchingTag = inquiry.tags?.some(tag => userTags.includes(tag))
+          if (!inquiry.tags || !userTags || userTags.length === 0) {
+            return false
+          }
+          const hasMatchingTag = inquiry.tags.some(tag => 
+            userTags.some(userTag => userTag.toLowerCase() === tag.toLowerCase())
+          )
           console.log('Inquiry:', inquiry.title, 'tags:', inquiry.tags, 'has matching tag:', hasMatchingTag)
           return hasMatchingTag
         })
         setActiveInquiries(filteredActive as Inquiry[])
 
         const filteredCompleted = (completedResult.data || []).filter(inquiry => 
-          inquiry.tags?.some(tag => userTags.includes(tag))
+          inquiry.tags?.some(tag => 
+            userTags.some(userTag => userTag.toLowerCase() === tag.toLowerCase())
+          )
         )
         setCompletedInquiries(filteredCompleted as Inquiry[])
       } else {
