@@ -75,7 +75,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .from('inquiries')
         .select(`
           *,
-          profiles:user_id (
+          profiles!inquiries_user_id_fkey (
             company_name
           ),
           seller_metrics:offers (

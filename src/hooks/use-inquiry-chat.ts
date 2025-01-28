@@ -37,7 +37,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         .from('messages')
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey (
+          sender:sender_id(
             company_name
           )
         `)
