@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { type Message } from "@/components/dashboard/types"
 
 type MessageWithSender = {
   id: string
@@ -10,8 +9,8 @@ type MessageWithSender = {
   created_at: string
   status: 'delivered' | 'read'
   offer_id: string | null
-  sender_profile: {
-    company_name: string | null
+  sender: {
+    company_name: string
   } | null
 }
 
@@ -20,85 +19,6 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
   const [loading, setLoading] = useState(true)
   const [newMessage, setNewMessage] = useState("")
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
-
-  const fetchMessages = async () => {
-    try {
-      const { data: messagesData, error } = await supabase
-        .from('messages')
-        .select(`
-          id,
-          inquiry_id,
-          sender_id,
-          content,
-          created_at,
-          status,
-          offer_id,
-          sender_profile:profiles(company_name)
-        `)
-        .eq('inquiry_id', inquiryId)
-        .order('created_at', { ascending: true })
-
-      if (error) throw error
-
-      // Type assertion to handle the response data
-      const typedMessages = (messagesData || []).map(message => {
-        return {
-          ...message,
-          status: message.status === 'read' ? 'read' : 'delivered',
-          sender_profile: message.sender_profile || { company_name: null }
-        } as MessageWithSender
-      })
-
-      setMessages(typedMessages)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching messages:', error)
-      setLoading(false)
-    }
-  }
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          inquiry_id: inquiryId,
-          offer_id: offerId,
-          sender_id: user.id,
-          content: newMessage,
-          status: 'delivered' as const
-        })
-
-      if (error) throw error
-      setNewMessage("")
-      await fetchMessages()
-    } catch (error) {
-      console.error('Error sending message:', error)
-    }
-  }
-
-  const handleMarkAsRead = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { error } = await supabase
-        .from('messages')
-        .update({ status: 'read' as const })
-        .eq('inquiry_id', inquiryId)
-        .eq('status', 'delivered')
-        .neq('sender_id', user.id)
-
-      if (error) throw error
-    } catch (error) {
-      console.error('Error marking messages as read:', error)
-    }
-  }
 
   useEffect(() => {
     fetchMessages()
@@ -123,18 +43,78 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
     }
   }, [inquiryId])
 
-  // Convert MessageWithSender[] to Message[] for the component
-  const formattedMessages: Message[] = messages.map(msg => ({
-    id: msg.id,
-    sender: msg.sender_id,
-    content: msg.content,
-    timestamp: msg.created_at,
-    status: msg.status,
-    sellerId: msg.sender_id
-  }))
+  const fetchMessages = async () => {
+    try {
+      const { data: messages, error } = await supabase
+        .from('messages')
+        .select(`
+          *,
+          sender:profiles!messages_sender_id_fkey (
+            company_name
+          )
+        `)
+        .eq('inquiry_id', inquiryId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      const formattedMessages = messages.map(message => ({
+        ...message,
+        company_name: message.sender?.company_name
+      }))
+
+      setMessages(formattedMessages)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching messages:', error)
+      setLoading(false)
+    }
+  }
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          inquiry_id: inquiryId,
+          offer_id: offerId,
+          sender_id: user.id,
+          content: newMessage
+        })
+
+      if (error) throw error
+      setNewMessage("")
+      await fetchMessages()
+    } catch (error) {
+      console.error('Error sending message:', error)
+    }
+  }
+
+  const handleMarkAsRead = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('messages')
+        .update({ status: 'read' })
+        .eq('inquiry_id', inquiryId)
+        .eq('status', 'delivered')
+        .neq('sender_id', user.id)
+
+      if (error) throw error
+    } catch (error) {
+      console.error('Error marking messages as read:', error)
+    }
+  }
 
   return {
-    messages: formattedMessages,
+    messages,
     loading,
     newMessage,
     selectedSeller,
