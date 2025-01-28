@@ -40,11 +40,14 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
       if (error) throw error
 
-      // Ensure the status is either 'delivered' or 'read'
-      const typedMessages = (messagesData || []).map(message => ({
-        ...message,
-        status: message.status === 'read' ? 'read' : 'delivered'
-      })) as MessageWithSender[]
+      // Type assertion to handle the response data
+      const typedMessages = (messagesData || []).map(message => {
+        return {
+          ...message,
+          status: message.status === 'read' ? 'read' : 'delivered',
+          sender_profile: message.sender_profile || { company_name: null }
+        } as MessageWithSender
+      })
 
       setMessages(typedMessages)
       setLoading(false)
