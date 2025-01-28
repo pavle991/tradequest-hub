@@ -62,7 +62,6 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         // For selling tab:
         // 1. Exclude user's own inquiries
         // 2. Show only active inquiries
-        // 3. Match with seller's tags
         query = query
           .neq('user_id', user.id)
           .eq('status', 'active')
@@ -77,9 +76,15 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         const filteredInquiries = inquiriesData.filter(inquiry => {
           const inquiryTags = Array.isArray(inquiry.tags) ? inquiry.tags : []
           
-          // Only filter if both arrays have tags
+          // For debugging
+          console.log('Inquiry:', inquiry.title)
+          console.log('Inquiry tags:', inquiryTags)
+          console.log('Profile tags:', profileTags)
+          
+          // Don't filter out if either array is empty
           if (inquiryTags.length === 0 || profileTags.length === 0) {
-            return false
+            console.log('No tags to compare, showing inquiry')
+            return true
           }
 
           // Convert all tags to lowercase for comparison
@@ -92,9 +97,12 @@ export const InquiryList = ({ type }: InquiryListProps) => {
           ).filter(tag => tag !== '')
 
           // Check if any tags match
-          return normalizedInquiryTags.some(tag => 
+          const hasMatch = normalizedInquiryTags.some(tag => 
             normalizedProfileTags.includes(tag)
           )
+          
+          console.log('Has matching tag:', hasMatch)
+          return hasMatch
         })
 
         setInquiries(filteredInquiries.map(inquiry => ({
