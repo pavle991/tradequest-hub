@@ -92,10 +92,10 @@ export const InquiryList = ({ type }: InquiryListProps) => {
           console.log('Parsed inquiry tags:', inquiryTags)
           console.log('Profile tags:', profileTags)
           
-          // If either array is empty, show the inquiry
+          // If either array is empty, don't show the inquiry
           if (inquiryTags.length === 0 || profileTags.length === 0) {
-            console.log('No tags to compare, showing inquiry')
-            return true
+            console.log('No tags to compare, hiding inquiry')
+            return false
           }
 
           // Check if any tags match
