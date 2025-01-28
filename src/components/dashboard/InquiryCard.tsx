@@ -8,7 +8,11 @@ import { SellerActions } from "./SellerActions"
 import { BuyerActions } from "./BuyerActions"
 
 type InquiryCardProps = {
-  inquiry: Inquiry
+  inquiry: Inquiry & {
+    company_name?: string
+    seller_rating?: number | null
+    total_sales?: number | null
+  }
   type: "buying" | "selling"
   offersCount?: number
   selectedInquiryId: string | null
@@ -109,7 +113,24 @@ export const InquiryCard = ({
     <Card key={inquiry.id} className="p-6">
       <div className="flex justify-between items-start">
         <div>
-          <h4 className="text-xl font-semibold mb-2">{inquiry.title}</h4>
+          <div className="flex items-center gap-2 mb-2">
+            <h4 className="text-xl font-semibold">{inquiry.title}</h4>
+            {inquiry.company_name && (
+              <span className="text-sm text-gray-600">
+                by {inquiry.company_name}
+              </span>
+            )}
+          </div>
+          {inquiry.seller_rating !== undefined && inquiry.total_sales !== undefined && (
+            <div className="text-sm text-gray-600 mb-2">
+              <span className="mr-4">
+                Rating: {inquiry.seller_rating ? `${inquiry.seller_rating.toFixed(1)}/5` : 'N/A'}
+              </span>
+              <span>
+                Total Sales: {inquiry.total_sales ? `${inquiry.total_sales.toLocaleString()} RSD` : 'N/A'}
+              </span>
+            </div>
+          )}
           <p className="text-gray-600 mb-4">{inquiry.description}</p>
           <div className="flex flex-wrap gap-2">
             {inquiry.tags.map((tag) => (

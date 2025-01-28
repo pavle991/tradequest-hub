@@ -8,6 +8,16 @@ type InquiryListProps = {
   type: "buying" | "selling"
 }
 
+type InquiryWithProfile = Inquiry & {
+  profiles: {
+    company_name: string
+  }
+  seller_metrics?: {
+    seller_rating: number | null
+    total_sales: number | null
+  }
+}
+
 const parseTags = (tags: any): string[] => {
   try {
     if (!tags) return []
@@ -20,7 +30,7 @@ const parseTags = (tags: any): string[] => {
 }
 
 export const InquiryList = ({ type }: InquiryListProps) => {
-  const [inquiries, setInquiries] = useState<Inquiry[]>([])
+  const [inquiries, setInquiries] = useState<InquiryWithProfile[]>([])
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [profileTags, setProfileTags] = useState<string[]>([])
@@ -63,7 +73,16 @@ export const InquiryList = ({ type }: InquiryListProps) => {
 
       let query = supabase
         .from('inquiries')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            company_name
+          ),
+          seller_metrics:user_id (
+            seller_rating,
+            total_sales
+          )
+        `)
         .eq('status', 'active')
         .order('created_at', { ascending: false })
 
@@ -142,7 +161,12 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         {inquiries.map((inquiry) => (
           <InquiryCard
             key={inquiry.id}
-            inquiry={inquiry}
+            inquiry={{
+              ...inquiry,
+              company_name: inquiry.profiles?.company_name,
+              seller_rating: inquiry.seller_metrics?.seller_rating,
+              total_sales: inquiry.seller_metrics?.total_sales
+            }}
             type={type}
             selectedInquiryId={selectedInquiryId}
             onToggleOffers={handleToggleOffers}
