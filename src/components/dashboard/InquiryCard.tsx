@@ -32,6 +32,23 @@ export const InquiryCard = ({
   const [offerId, setOfferId] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const [lastCheckedAt, setLastCheckedAt] = useState<Date>(new Date())
+  const [companyName, setCompanyName] = useState<string>("")
+
+  useEffect(() => {
+    const fetchCompanyName = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('company_name')
+        .eq('id', inquiry.user_id)
+        .single()
+      
+      if (data) {
+        setCompanyName(data.company_name)
+      }
+    }
+    
+    fetchCompanyName()
+  }, [inquiry.user_id])
 
   const checkExistingOffer = async () => {
     try {
@@ -113,13 +130,9 @@ export const InquiryCard = ({
     <Card key={inquiry.id} className="p-6">
       <div className="flex justify-between items-start">
         <div>
+          <div className="text-sm text-gray-600 mb-1">{companyName}</div>
           <div className="flex items-center gap-2 mb-2">
             <h4 className="text-xl font-semibold">{inquiry.title}</h4>
-            {inquiry.company_name && (
-              <span className="text-sm text-gray-600">
-                by {inquiry.company_name}
-              </span>
-            )}
           </div>
           {inquiry.seller_rating !== undefined && inquiry.total_sales !== undefined && (
             <div className="text-sm text-gray-600 mb-2">
