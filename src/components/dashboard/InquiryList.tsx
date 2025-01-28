@@ -11,11 +11,11 @@ type InquiryListProps = {
 type InquiryWithProfile = Inquiry & {
   profiles: {
     company_name: string
-  }
+  } | null
   seller_metrics?: {
     seller_rating: number | null
     total_sales: number | null
-  }
+  } | null
 }
 
 const parseTags = (tags: any): string[] => {
@@ -75,10 +75,10 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .from('inquiries')
         .select(`
           *,
-          profiles:user_id (
+          profiles!inquiries_user_id_fkey (
             company_name
           ),
-          seller_metrics:user_id (
+          seller_metrics:offers (
             seller_rating,
             total_sales
           )
@@ -123,15 +123,9 @@ export const InquiryList = ({ type }: InquiryListProps) => {
           return hasMatch
         })
 
-        setInquiries(filteredInquiries.map(inquiry => ({
-          ...inquiry,
-          type: inquiry.type as "buying" | "selling"
-        })))
+        setInquiries(filteredInquiries as InquiryWithProfile[])
       } else if (inquiriesData) {
-        setInquiries(inquiriesData.map(inquiry => ({
-          ...inquiry,
-          type: inquiry.type as "buying" | "selling"
-        })))
+        setInquiries(inquiriesData as InquiryWithProfile[])
       }
     } catch (error) {
       console.error('Error fetching inquiries:', error)

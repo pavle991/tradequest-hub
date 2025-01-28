@@ -58,12 +58,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
       if (error) throw error
 
-      const formattedMessages = messages.map(message => ({
-        ...message,
-        company_name: message.sender?.company_name
-      }))
-
-      setMessages(formattedMessages)
+      setMessages(messages as MessageWithSender[])
       setLoading(false)
     } catch (error) {
       console.error('Error fetching messages:', error)
