@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { Toaster } from "@/components/ui/sonner";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
+import BuyingDashboard from "@/pages/BuyingDashboard";
+import SellingDashboard from "@/pages/SellingDashboard";
 import Index from "@/pages/Index";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
@@ -13,13 +14,11 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -37,15 +36,19 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route 
           path="/login" 
-          element={user ? <Navigate to="/dashboard" /> : <Login />} 
+          element={user ? <Navigate to="/buying" /> : <Login />} 
         />
         <Route 
           path="/register" 
-          element={user ? <Navigate to="/dashboard" /> : <Register />} 
+          element={user ? <Navigate to="/buying" /> : <Register />} 
         />
         <Route 
-          path="/dashboard" 
-          element={user ? <Dashboard /> : <Navigate to="/login" />} 
+          path="/buying" 
+          element={user ? <BuyingDashboard /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/selling" 
+          element={user ? <SellingDashboard /> : <Navigate to="/login" />} 
         />
       </Routes>
       <Toaster />
