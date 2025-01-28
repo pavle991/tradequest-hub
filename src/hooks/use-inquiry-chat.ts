@@ -46,23 +46,32 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
   const fetchMessages = async () => {
     try {
-      const { data: messages, error } = await supabase
+      const { data: messagesData, error } = await supabase
         .from('messages')
         .select(`
-          *,
-          sender:profiles(company_name)
+          id,
+          inquiry_id,
+          sender_id,
+          content,
+          created_at,
+          status,
+          offer_id,
+          sender:profiles!messages_sender_id_fkey (
+            company_name
+          )
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
 
       if (error) throw error
 
-      const formattedMessages = messages.map(message => ({
+      // Ensure the status is either 'delivered' or 'read'
+      const typedMessages = messagesData.map(message => ({
         ...message,
-        sender: message.sender
-      }))
+        status: message.status === 'read' ? 'read' : 'delivered'
+      })) as MessageWithSender[]
 
-      setMessages(formattedMessages)
+      setMessages(typedMessages)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching messages:', error)
@@ -84,7 +93,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
           offer_id: offerId,
           sender_id: user.id,
           content: newMessage,
-          status: 'delivered'
+          status: 'delivered' as const
         })
 
       if (error) throw error
@@ -102,7 +111,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
       const { error } = await supabase
         .from('messages')
-        .update({ status: 'read' })
+        .update({ status: 'read' as const })
         .eq('inquiry_id', inquiryId)
         .eq('status', 'delivered')
         .neq('sender_id', user.id)
