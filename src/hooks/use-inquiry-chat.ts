@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
+import { type Message } from "@/components/dashboard/types"
 
 type MessageWithSender = {
   id: string
@@ -10,7 +11,7 @@ type MessageWithSender = {
   status: 'delivered' | 'read'
   offer_id: string | null
   sender: {
-    company_name: string
+    company_name: string | null
   } | null
 }
 
@@ -49,9 +50,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         .from('messages')
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey (
-            company_name
-          )
+          sender:profiles(company_name)
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
@@ -60,7 +59,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
       const formattedMessages = messages.map(message => ({
         ...message,
-        company_name: message.sender?.company_name
+        sender: message.sender
       }))
 
       setMessages(formattedMessages)
@@ -84,7 +83,8 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
           inquiry_id: inquiryId,
           offer_id: offerId,
           sender_id: user.id,
-          content: newMessage
+          content: newMessage,
+          status: 'delivered'
         })
 
       if (error) throw error
@@ -113,8 +113,18 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
     }
   }
 
+  // Convert MessageWithSender[] to Message[] for the component
+  const formattedMessages: Message[] = messages.map(msg => ({
+    id: msg.id,
+    sender: msg.sender_id,
+    content: msg.content,
+    timestamp: msg.created_at,
+    status: msg.status,
+    sellerId: msg.sender_id
+  }))
+
   return {
-    messages,
+    messages: formattedMessages,
     loading,
     newMessage,
     selectedSeller,

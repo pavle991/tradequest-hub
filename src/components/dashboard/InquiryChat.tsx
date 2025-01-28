@@ -81,7 +81,7 @@ export const InquiryChat = ({
         />
         <div className="flex flex-col h-[500px]">
           <ChatMessageList
-            messages={messages || []}
+            messages={messages}
             selectedSeller={selectedSeller}
             onSelectSeller={setSelectedSeller}
             onMarkAsRead={handleMarkAsRead}
