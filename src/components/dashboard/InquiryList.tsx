@@ -85,7 +85,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
 
       if (type === "selling" && inquiriesData) {
         // Filter inquiries based on matching tags
-        const filteredInquiries = inquiriesData.filter(inquiry => {
+        const filteredInquiries = inquiriesData.filter((inquiry) => {
           const inquiryTags = parseTags(inquiry.tags)
           
           console.log('Inquiry:', inquiry.title)
