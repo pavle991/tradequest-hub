@@ -10,7 +10,7 @@ type MessageWithSender = {
   created_at: string
   status: 'delivered' | 'read'
   offer_id: string | null
-  sender: {
+  sender_profile: {
     company_name: string | null
   } | null
 }
@@ -20,29 +20,6 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
   const [loading, setLoading] = useState(true)
   const [newMessage, setNewMessage] = useState("")
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchMessages()
-    const channel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `inquiry_id=eq.${inquiryId}`
-        },
-        () => {
-          fetchMessages()
-        }
-      )
-      .subscribe()
-
-    return () => {
-      channel.unsubscribe()
-    }
-  }, [inquiryId])
 
   const fetchMessages = async () => {
     try {
@@ -56,9 +33,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
           created_at,
           status,
           offer_id,
-          sender:profiles!messages_sender_id_fkey (
-            company_name
-          )
+          sender_profile:profiles(company_name)
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true })
@@ -66,7 +41,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
       if (error) throw error
 
       // Ensure the status is either 'delivered' or 'read'
-      const typedMessages = messagesData.map(message => ({
+      const typedMessages = (messagesData || []).map(message => ({
         ...message,
         status: message.status === 'read' ? 'read' : 'delivered'
       })) as MessageWithSender[]
@@ -121,6 +96,29 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
       console.error('Error marking messages as read:', error)
     }
   }
+
+  useEffect(() => {
+    fetchMessages()
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `inquiry_id=eq.${inquiryId}`
+        },
+        () => {
+          fetchMessages()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      channel.unsubscribe()
+    }
+  }, [inquiryId])
 
   // Convert MessageWithSender[] to Message[] for the component
   const formattedMessages: Message[] = messages.map(msg => ({
