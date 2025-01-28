@@ -8,11 +8,22 @@ type InquiryListProps = {
   type: "buying" | "selling"
 }
 
-const parseTags = (tags: any): string[] => {
+const parseTags = (tags: unknown): string[] => {
   try {
     if (!tags) return []
     if (Array.isArray(tags)) return tags.map(tag => tag.toLowerCase().trim())
-    return JSON.parse(tags).map((tag: string) => tag.toLowerCase().trim())
+    if (typeof tags === 'string') {
+      try {
+        const parsed = JSON.parse(tags)
+        if (Array.isArray(parsed)) {
+          return parsed.map(tag => tag.toLowerCase().trim())
+        }
+      } catch (e) {
+        // If JSON parsing fails, split the string
+        return tags.split(',').map(tag => tag.toLowerCase().trim())
+      }
+    }
+    return []
   } catch (error) {
     console.error("Error parsing tags:", tags, error)
     return []
@@ -46,10 +57,14 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .eq('id', user.id)
         .single()
 
+      console.log('Raw profile tags:', profile?.tags)
+      
       if (profile?.tags) {
         const parsedProfileTags = parseTags(profile.tags)
         console.log('Parsed profile tags:', parsedProfileTags)
         setProfileTags(parsedProfileTags)
+      } else {
+        console.log('No tags found in profile')
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
@@ -68,12 +83,10 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
-        // For buying tab, show only user's own inquiries
         query = query
           .eq('user_id', user.id)
           .eq('type', 'buying')
       } else {
-        // For selling tab, exclude user's own inquiries
         query = query
           .neq('user_id', user.id)
           .eq('type', 'buying')
@@ -84,21 +97,19 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (error) throw error
 
       if (type === "selling" && inquiriesData) {
-        // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter((inquiry) => {
           const inquiryTags = parseTags(inquiry.tags)
           
           console.log('Inquiry:', inquiry.title)
+          console.log('Raw inquiry tags:', inquiry.tags)
           console.log('Parsed inquiry tags:', inquiryTags)
           console.log('Profile tags:', profileTags)
           
-          // If either array is empty, don't show the inquiry
           if (inquiryTags.length === 0 || profileTags.length === 0) {
             console.log('No tags to compare, hiding inquiry')
             return false
           }
 
-          // Check if any tags match
           const hasMatch = inquiryTags.some(tag => profileTags.includes(tag))
           console.log('Has matching tag:', hasMatch)
           return hasMatch
