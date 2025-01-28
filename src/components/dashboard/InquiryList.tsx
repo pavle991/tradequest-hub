@@ -35,8 +35,12 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .eq('id', user.id)
         .single()
 
-      if (profile?.tags && Array.isArray(profile.tags)) {
-        setProfileTags(profile.tags)
+      if (profile?.tags) {
+        // Parse profile tags if they're stored as JSON string
+        const parsedTags = Array.isArray(profile.tags) 
+          ? profile.tags 
+          : JSON.parse(profile.tags)
+        setProfileTags(parsedTags)
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
@@ -51,20 +55,19 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       let query = supabase
         .from('inquiries')
         .select('*')
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
         // For buying tab, show only user's own inquiries
         query = query
           .eq('user_id', user.id)
-          .eq('status', 'active')
+          .eq('type', 'buying')
       } else {
-        // For selling tab:
-        // 1. Exclude user's own inquiries
-        // 2. Show only active inquiries
+        // For selling tab, exclude user's own inquiries
         query = query
           .neq('user_id', user.id)
-          .eq('status', 'active')
+          .eq('type', 'buying')
       }
 
       const { data: inquiriesData, error } = await query
@@ -74,9 +77,13 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling" && inquiriesData) {
         // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
-          const inquiryTags = Array.isArray(inquiry.tags) ? inquiry.tags : []
-          
-          // For debugging
+          // Parse inquiry tags if they're stored as JSON string
+          const inquiryTags = inquiry.tags 
+            ? (Array.isArray(inquiry.tags) 
+                ? inquiry.tags 
+                : JSON.parse(inquiry.tags))
+            : []
+
           console.log('Inquiry:', inquiry.title)
           console.log('Inquiry tags:', inquiryTags)
           console.log('Profile tags:', profileTags)
