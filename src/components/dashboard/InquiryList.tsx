@@ -8,6 +8,17 @@ type InquiryListProps = {
   type: "buying" | "selling"
 }
 
+const parseTags = (tags: any): string[] => {
+  try {
+    if (!tags) return []
+    if (Array.isArray(tags)) return tags.map(tag => tag.toLowerCase().trim())
+    return JSON.parse(tags).map((tag: string) => tag.toLowerCase().trim())
+  } catch (error) {
+    console.error("Error parsing tags:", tags, error)
+    return []
+  }
+}
+
 export const InquiryList = ({ type }: InquiryListProps) => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null)
@@ -36,11 +47,9 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .single()
 
       if (profile?.tags) {
-        // Parse profile tags if they're stored as JSON string
-        const parsedTags = Array.isArray(profile.tags) 
-          ? profile.tags 
-          : JSON.parse(profile.tags)
-        setProfileTags(parsedTags)
+        const parsedProfileTags = parseTags(profile.tags)
+        console.log('Parsed profile tags:', parsedProfileTags)
+        setProfileTags(parsedProfileTags)
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
@@ -77,37 +86,20 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (type === "selling" && inquiriesData) {
         // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
-          // Parse inquiry tags if they're stored as JSON string
-          const inquiryTags = inquiry.tags 
-            ? (Array.isArray(inquiry.tags) 
-                ? inquiry.tags 
-                : JSON.parse(inquiry.tags))
-            : []
-
+          const inquiryTags = parseTags(inquiry.tags)
+          
           console.log('Inquiry:', inquiry.title)
-          console.log('Inquiry tags:', inquiryTags)
+          console.log('Parsed inquiry tags:', inquiryTags)
           console.log('Profile tags:', profileTags)
           
-          // If either array is empty, don't show the inquiry
+          // If either array is empty, show the inquiry
           if (inquiryTags.length === 0 || profileTags.length === 0) {
-            console.log('No tags to compare, hiding inquiry')
-            return false
+            console.log('No tags to compare, showing inquiry')
+            return true
           }
 
-          // Convert all tags to lowercase for comparison
-          const normalizedInquiryTags = inquiryTags.map(tag => 
-            typeof tag === 'string' ? tag.toLowerCase().trim() : ''
-          ).filter(tag => tag !== '')
-
-          const normalizedProfileTags = profileTags.map(tag => 
-            typeof tag === 'string' ? tag.toLowerCase().trim() : ''
-          ).filter(tag => tag !== '')
-
           // Check if any tags match
-          const hasMatch = normalizedInquiryTags.some(tag => 
-            normalizedProfileTags.includes(tag)
-          )
-          
+          const hasMatch = inquiryTags.some(tag => profileTags.includes(tag))
           console.log('Has matching tag:', hasMatch)
           return hasMatch
         })
