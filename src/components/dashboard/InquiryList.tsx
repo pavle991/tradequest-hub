@@ -9,7 +9,7 @@ type InquiryListProps = {
 }
 
 type InquiryWithProfile = Inquiry & {
-  profiles: {
+  profiles?: {
     company_name: string
   } | null
   seller_metrics?: {
@@ -87,12 +87,10 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
-        // For buying tab, show only user's own inquiries
         query = query
           .eq('user_id', user.id)
           .eq('type', 'buying')
       } else {
-        // For selling tab, exclude user's own inquiries
         query = query
           .neq('user_id', user.id)
           .eq('type', 'buying')
@@ -103,7 +101,6 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (error) throw error
 
       if (type === "selling" && inquiriesData) {
-        // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
           const inquiryTags = parseTags(inquiry.tags)
           
@@ -111,13 +108,11 @@ export const InquiryList = ({ type }: InquiryListProps) => {
           console.log('Parsed inquiry tags:', inquiryTags)
           console.log('Profile tags:', profileTags)
           
-          // If either array is empty, show the inquiry
           if (inquiryTags.length === 0 || profileTags.length === 0) {
             console.log('No tags to compare, showing inquiry')
             return true
           }
 
-          // Check if any tags match
           const hasMatch = inquiryTags.some(tag => profileTags.includes(tag))
           console.log('Has matching tag:', hasMatch)
           return hasMatch
