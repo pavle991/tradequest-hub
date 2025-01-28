@@ -35,7 +35,6 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .eq('id', user.id)
         .single()
 
-      console.log('Profile tags from database:', profile?.tags)
       if (profile?.tags && Array.isArray(profile.tags)) {
         setProfileTags(profile.tags)
       }
@@ -55,32 +54,31 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
-        // Za buying tab, prikaži samo upite trenutnog korisnika
-        query = query.eq('user_id', user.id)
+        // For buying tab, show only user's own inquiries
+        query = query
+          .eq('user_id', user.id)
+          .eq('status', 'active')
       } else {
-        // Za selling tab, prikaži sve upite OSIM onih od trenutnog korisnika
-        query = query.neq('user_id', user.id)
+        // For selling tab:
+        // 1. Exclude user's own inquiries
+        // 2. Show only active inquiries
+        // 3. Match with seller's tags
+        query = query
+          .neq('user_id', user.id)
+          .eq('status', 'active')
       }
 
       const { data: inquiriesData, error } = await query
 
       if (error) throw error
 
-      console.log('Fetched inquiries:', inquiriesData)
-      console.log('Current profile tags:', profileTags)
-
       if (type === "selling" && inquiriesData) {
         // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
           const inquiryTags = Array.isArray(inquiry.tags) ? inquiry.tags : []
           
-          console.log(`Comparing tags for inquiry "${inquiry.title}":`)
-          console.log('Inquiry tags:', inquiryTags)
-          console.log('Profile tags:', profileTags)
-          
           // Only filter if both arrays have tags
           if (inquiryTags.length === 0 || profileTags.length === 0) {
-            console.log('No tags available for comparison')
             return false
           }
 
@@ -94,12 +92,9 @@ export const InquiryList = ({ type }: InquiryListProps) => {
           ).filter(tag => tag !== '')
 
           // Check if any tags match
-          const hasMatchingTag = normalizedInquiryTags.some(tag => 
+          return normalizedInquiryTags.some(tag => 
             normalizedProfileTags.includes(tag)
           )
-
-          console.log('Has matching tag:', hasMatchingTag)
-          return hasMatchingTag
         })
 
         setInquiries(filteredInquiries.map(inquiry => ({
@@ -134,7 +129,9 @@ export const InquiryList = ({ type }: InquiryListProps) => {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Upiti</h2>
+        <h2 className="text-xl font-semibold">
+          {type === "buying" ? "Vaši upiti" : "Upiti koji odgovaraju vašim tagovima"}
+        </h2>
         {inquiries.map((inquiry) => (
           <InquiryCard
             key={inquiry.id}

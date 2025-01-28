@@ -14,6 +14,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          seller_id: string | null
           status: string
           tags: string[] | null
           title: string
@@ -25,6 +26,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          seller_id?: string | null
           status?: string
           tags?: string[] | null
           title: string
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          seller_id?: string | null
           status?: string
           tags?: string[] | null
           title?: string
