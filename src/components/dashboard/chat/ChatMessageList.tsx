@@ -30,7 +30,13 @@ export const ChatMessageList = ({
         {messages.map((message) => (
           <ChatMessage
             key={message.id}
-            message={message}
+            message={{
+              id: message.id,
+              sender: message.sender_id,
+              content: message.content,
+              timestamp: message.created_at,
+              status: message.status
+            }}
             selectedSeller={selectedSeller}
             onSelectSeller={onSelectSeller}
             onMarkAsRead={() => onMarkAsRead(message.id)}

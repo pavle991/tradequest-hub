@@ -15,7 +15,7 @@ type InquiryWithProfile = Inquiry & {
   seller_metrics?: {
     seller_rating: number | null
     total_sales: number | null
-  } | null
+  }[] | null
 }
 
 const parseTags = (tags: any): string[] => {
@@ -75,7 +75,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .from('inquiries')
         .select(`
           *,
-          profiles!inquiries_user_id_fkey (
+          profiles:user_id (
             company_name
           ),
           seller_metrics:offers (
@@ -153,8 +153,8 @@ export const InquiryList = ({ type }: InquiryListProps) => {
             inquiry={{
               ...inquiry,
               company_name: inquiry.profiles?.company_name,
-              seller_rating: inquiry.seller_metrics?.seller_rating,
-              total_sales: inquiry.seller_metrics?.total_sales
+              seller_rating: inquiry.seller_metrics?.[0]?.seller_rating,
+              total_sales: inquiry.seller_metrics?.[0]?.total_sales
             }}
             type={type}
             selectedInquiryId={selectedInquiryId}
