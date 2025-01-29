@@ -8,7 +8,4 @@ export type Inquiry = {
   user_id: string
   created_at: string
   updated_at: string
-  company_name?: string
-  seller_rating?: number | null
-  total_sales?: number | null
 }

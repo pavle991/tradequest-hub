@@ -8,29 +8,8 @@ type InquiryListProps = {
   type: "buying" | "selling"
 }
 
-type InquiryWithProfile = Inquiry & {
-  profiles?: {
-    company_name: string
-  } | null
-  seller_metrics?: {
-    seller_rating: number | null
-    total_sales: number | null
-  }[] | null
-}
-
-const parseTags = (tags: any): string[] => {
-  try {
-    if (!tags) return []
-    if (Array.isArray(tags)) return tags.map(tag => tag.toLowerCase().trim())
-    return JSON.parse(tags).map((tag: string) => tag.toLowerCase().trim())
-  } catch (error) {
-    console.error("Error parsing tags:", tags, error)
-    return []
-  }
-}
-
 export const InquiryList = ({ type }: InquiryListProps) => {
-  const [inquiries, setInquiries] = useState<InquiryWithProfile[]>([])
+  const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [profileTags, setProfileTags] = useState<string[]>([])
@@ -56,10 +35,8 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         .eq('id', user.id)
         .single()
 
-      if (profile?.tags) {
-        const parsedProfileTags = parseTags(profile.tags)
-        console.log('Parsed profile tags:', parsedProfileTags)
-        setProfileTags(parsedProfileTags)
+      if (profile?.tags && Array.isArray(profile.tags)) {
+        setProfileTags(profile.tags)
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
@@ -73,27 +50,21 @@ export const InquiryList = ({ type }: InquiryListProps) => {
 
       let query = supabase
         .from('inquiries')
-        .select(`
-          *,
-          profiles!inquiries_user_id_fkey (
-            company_name
-          ),
-          seller_metrics:offers (
-            seller_rating,
-            total_sales
-          )
-        `)
-        .eq('status', 'active')
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (type === "buying") {
+        // For buying tab, show only user's own inquiries
         query = query
           .eq('user_id', user.id)
-          .eq('type', 'buying')
+          .eq('status', 'active')
       } else {
+        // For selling tab:
+        // 1. Exclude user's own inquiries
+        // 2. Show only active inquiries
         query = query
           .neq('user_id', user.id)
-          .eq('type', 'buying')
+          .eq('status', 'active')
       }
 
       const { data: inquiriesData, error } = await query
@@ -101,26 +72,48 @@ export const InquiryList = ({ type }: InquiryListProps) => {
       if (error) throw error
 
       if (type === "selling" && inquiriesData) {
+        // Filter inquiries based on matching tags
         const filteredInquiries = inquiriesData.filter(inquiry => {
-          const inquiryTags = parseTags(inquiry.tags)
+          const inquiryTags = Array.isArray(inquiry.tags) ? inquiry.tags : []
           
+          // For debugging
           console.log('Inquiry:', inquiry.title)
-          console.log('Parsed inquiry tags:', inquiryTags)
+          console.log('Inquiry tags:', inquiryTags)
           console.log('Profile tags:', profileTags)
           
+          // Don't filter out if either array is empty
           if (inquiryTags.length === 0 || profileTags.length === 0) {
             console.log('No tags to compare, showing inquiry')
             return true
           }
 
-          const hasMatch = inquiryTags.some(tag => profileTags.includes(tag))
+          // Convert all tags to lowercase for comparison
+          const normalizedInquiryTags = inquiryTags.map(tag => 
+            typeof tag === 'string' ? tag.toLowerCase().trim() : ''
+          ).filter(tag => tag !== '')
+
+          const normalizedProfileTags = profileTags.map(tag => 
+            typeof tag === 'string' ? tag.toLowerCase().trim() : ''
+          ).filter(tag => tag !== '')
+
+          // Check if any tags match
+          const hasMatch = normalizedInquiryTags.some(tag => 
+            normalizedProfileTags.includes(tag)
+          )
+          
           console.log('Has matching tag:', hasMatch)
           return hasMatch
         })
 
-        setInquiries(filteredInquiries as InquiryWithProfile[])
+        setInquiries(filteredInquiries.map(inquiry => ({
+          ...inquiry,
+          type: inquiry.type as "buying" | "selling"
+        })))
       } else if (inquiriesData) {
-        setInquiries(inquiriesData as InquiryWithProfile[])
+        setInquiries(inquiriesData.map(inquiry => ({
+          ...inquiry,
+          type: inquiry.type as "buying" | "selling"
+        })))
       }
     } catch (error) {
       console.error('Error fetching inquiries:', error)
@@ -150,12 +143,7 @@ export const InquiryList = ({ type }: InquiryListProps) => {
         {inquiries.map((inquiry) => (
           <InquiryCard
             key={inquiry.id}
-            inquiry={{
-              ...inquiry,
-              company_name: inquiry.profiles?.company_name,
-              seller_rating: inquiry.seller_metrics?.[0]?.seller_rating,
-              total_sales: inquiry.seller_metrics?.[0]?.total_sales
-            }}
+            inquiry={inquiry}
             type={type}
             selectedInquiryId={selectedInquiryId}
             onToggleOffers={handleToggleOffers}

@@ -1,9 +1,21 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { type Message } from "@/components/dashboard/types"
+
+type MessageWithSender = {
+  id: string
+  inquiry_id: string
+  sender_id: string
+  content: string
+  created_at: string
+  status: 'delivered' | 'read'
+  offer_id: string | null
+  sender: {
+    company_name: string
+  } | null
+}
 
 export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<MessageWithSender[]>([])
   const [loading, setLoading] = useState(true)
   const [newMessage, setNewMessage] = useState("")
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
@@ -37,7 +49,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
         .from('messages')
         .select(`
           *,
-          sender:sender_id(
+          sender:profiles!messages_sender_id_fkey (
             company_name
           )
         `)
@@ -46,7 +58,12 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
 
       if (error) throw error
 
-      setMessages(messages as Message[])
+      const formattedMessages = messages.map(message => ({
+        ...message,
+        company_name: message.sender?.company_name
+      }))
+
+      setMessages(formattedMessages)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching messages:', error)

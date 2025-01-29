@@ -22,7 +22,7 @@ export const ChatMessageList = ({
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [messages])
+  }, [messages]) // Scroll whenever messages change
 
   return (
     <ScrollArea className="flex-grow p-4">
@@ -30,19 +30,13 @@ export const ChatMessageList = ({
         {messages.map((message) => (
           <ChatMessage
             key={message.id}
-            message={{
-              id: message.id,
-              sender: message.sender_id,
-              content: message.content,
-              timestamp: message.created_at,
-              status: message.status
-            }}
+            message={message}
             selectedSeller={selectedSeller}
             onSelectSeller={onSelectSeller}
             onMarkAsRead={() => onMarkAsRead(message.id)}
           />
         ))}
-        <div ref={scrollRef} />
+        <div ref={scrollRef} /> {/* Invisible element at the bottom for scrolling */}
       </div>
     </ScrollArea>
   )

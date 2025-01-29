@@ -1,11 +1,11 @@
 export type Message = {
   id: string
+  sender: string
   content: string
-  created_at: string
-  sender_id: string
-  status: 'delivered' | 'read'
-  offer_id?: string | null
-  sender?: {
-    company_name: string
-  } | null
+  timestamp: string
+  sellerId?: string
+  sellerRating?: number
+  totalSales?: number
+  numberOfRatings?: number
+  status?: 'delivered' | 'read'
 }
