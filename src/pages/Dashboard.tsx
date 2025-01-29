@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Analytics } from "@/components/dashboard/Analytics"
@@ -8,9 +8,54 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { CompanyProfileButton } from "@/components/layout/CompanyProfileButton"
 import { type Inquiry } from "@/components/dashboard/types"
+import { supabase } from "@/integrations/supabase/client"
 
 const Dashboard = () => {
+  const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const { toast } = useToast()
+
+  useEffect(() => {
+    fetchInquiries()
+  }, [])
+
+  const fetchInquiries = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast({
+          title: "Greška",
+          description: "Niste prijavljeni",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('inquiries')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching inquiries:', error)
+        toast({
+          title: "Greška",
+          description: "Došlo je do greške prilikom učitavanja upita",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setInquiries(data as Inquiry[])
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Greška",
+        description: "Došlo je do greške prilikom učitavanja upita",
+        variant: "destructive",
+      })
+    }
+  }
 
   const handleSubmitInquiry = (title: string, description: string, type: "buying" | "selling", tags: string[]) => {
     const newInquiry: Inquiry = {
@@ -24,13 +69,15 @@ const Dashboard = () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
+    
+    setInquiries(prev => [newInquiry, ...prev])
   }
 
   // Analytics data
   const analyticsData = {
-    totalInquiries: 0,
-    activeInquiries: 0,
-    completedInquiries: 0,
+    totalInquiries: inquiries.length,
+    activeInquiries: inquiries.filter(i => i.status === "aktivan").length,
+    completedInquiries: inquiries.filter(i => i.status === "završen").length,
     averageResponseTime: "24h",
     successRate: 85
   }
@@ -52,11 +99,11 @@ const Dashboard = () => {
           
           <TabsContent value="buying" className="space-y-6">
             <NewInquiryForm onSubmit={handleSubmitInquiry} type="buying" />
-            <InquiryList type="buying" />
+            <InquiryList inquiries={inquiries} type="buying" />
           </TabsContent>
 
           <TabsContent value="selling" className="space-y-6">
-            <InquiryList type="selling" />
+            <InquiryList inquiries={inquiries} type="selling" />
           </TabsContent>
         </Tabs>
 

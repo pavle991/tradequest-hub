@@ -3,8 +3,6 @@ import { Card } from "@/components/ui/card"
 import { Avatar } from "@/components/ui/avatar"
 import { MessageCircle, Check } from "lucide-react"
 import { SellerRating } from "./SellerRating"
-import { supabase } from "@/integrations/supabase/client"
-import { useEffect, useState } from "react"
 
 type ChatMessageProps = {
   message: {
@@ -29,30 +27,16 @@ export const ChatMessage = ({
   onSelectSeller,
   onMarkAsRead 
 }: ChatMessageProps) => {
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUserId(user?.id || null)
-    }
-    getCurrentUser()
-  }, [])
-
-  // Determine if the current user is the sender
-  const isCurrentUserSender = currentUserId === message.sender
-
-  // Show "Vi" for current user's messages, appropriate label for others
-  const senderLabel = isCurrentUserSender ? "Vi" : (message.sellerId ? "Prodavac" : "Kupac")
+  const isBuyer = message.sender === "Kupac"
 
   return (
-    <div className={`flex gap-2 ${isCurrentUserSender ? "justify-end" : "justify-start"}`}>
-      <div className={`flex gap-2 max-w-[80%] ${isCurrentUserSender ? "flex-row-reverse" : "flex-row"}`}>
+    <div className={`flex gap-2 ${isBuyer ? "justify-end" : "justify-start"}`}>
+      <div className={`flex gap-2 max-w-[80%] ${isBuyer ? "flex-row-reverse" : "flex-row"}`}>
         <Avatar />
         <Card className="p-3">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold">{senderLabel}</p>
+              <p className="text-sm font-semibold">{message.sender}</p>
               {message.status && (
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   {message.status === 'read' ? (

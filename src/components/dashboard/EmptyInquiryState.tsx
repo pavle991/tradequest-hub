@@ -9,7 +9,7 @@ export const EmptyInquiryState = ({ type }: EmptyInquiryStateProps) => {
     <Card className="p-6">
       <p className="text-center text-gray-500">
         {type === "buying" 
-          ? "Još uvek nemate upita za nabavku." 
+          ? "Još uvek nemate aktivnih upita za nabavku." 
           : "Trenutno nema upita koji odgovaraju vašim tagovima."}
       </p>
     </Card>

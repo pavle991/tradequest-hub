@@ -38,17 +38,13 @@ const Login = () => {
         password: values.password,
       });
 
-      if (error) {
-        console.error('Login error:', error);
-        toast.error("Pogrešan email ili lozinka");
-        return;
-      }
+      if (error) throw error;
 
       toast.success("Uspešno ste se prijavili!");
       navigate("/dashboard");
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error("Došlo je do greške prilikom prijave");
+      toast.error(error.message || "Došlo je do greške prilikom prijave");
     } finally {
       setIsLoading(false);
     }

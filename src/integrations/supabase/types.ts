@@ -14,7 +14,6 @@ export type Database = {
           created_at: string
           description: string
           id: string
-          seller_id: string | null
           status: string
           tags: string[] | null
           title: string
@@ -26,7 +25,6 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
-          seller_id?: string | null
           status?: string
           tags?: string[] | null
           title: string
@@ -38,7 +36,6 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
-          seller_id?: string | null
           status?: string
           tags?: string[] | null
           title?: string
@@ -46,7 +43,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoice_items: {
         Row: {
@@ -146,9 +151,16 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "invoices_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoices_inquiry_id_fkey"
             columns: ["inquiry_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "inquiries"
             referencedColumns: ["id"]
           },
@@ -157,6 +169,13 @@ export type Database = {
             columns: ["offer_id"]
             isOneToOne: false
             referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -202,6 +221,13 @@ export type Database = {
             columns: ["offer_id"]
             isOneToOne: false
             referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -257,6 +283,13 @@ export type Database = {
             referencedRelation: "inquiries"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "offers_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -276,7 +309,6 @@ export type Database = {
           id: string
           instagram: string | null
           linkedin: string | null
-          logo_url: string | null
           phone: string | null
           pib: string | null
           postal_code: string | null
@@ -303,7 +335,6 @@ export type Database = {
           id: string
           instagram?: string | null
           linkedin?: string | null
-          logo_url?: string | null
           phone?: string | null
           pib?: string | null
           postal_code?: string | null
@@ -330,7 +361,6 @@ export type Database = {
           id?: string
           instagram?: string | null
           linkedin?: string | null
-          logo_url?: string | null
           phone?: string | null
           pib?: string | null
           postal_code?: string | null
@@ -342,47 +372,6 @@ export type Database = {
           working_hours?: string | null
         }
         Relationships: []
-      }
-      ratings: {
-        Row: {
-          comment: string | null
-          created_at: string
-          id: string
-          invoice_id: string
-          parameters: Json | null
-          rated_id: string
-          rater_id: string
-          rating: number
-        }
-        Insert: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          invoice_id: string
-          parameters?: Json | null
-          rated_id: string
-          rater_id: string
-          rating: number
-        }
-        Update: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          invoice_id?: string
-          parameters?: Json | null
-          rated_id?: string
-          rater_id?: string
-          rating?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ratings_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {

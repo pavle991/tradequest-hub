@@ -4,21 +4,19 @@ import { OfferCard } from "./offer/OfferCard"
 import { OfferListLoading } from "./offer/OfferListLoading"
 import { EmptyOfferList } from "./offer/EmptyOfferList"
 
-type OfferProfile = {
-  company_name: string
-}
-
 type Offer = {
   id: string
   seller_id: string
   price: number
   currency: string
   description: string
-  seller_rating: number | null
-  total_sales: number | null
-  number_of_ratings: number | null
+  seller_rating: number
+  total_sales: number
+  number_of_ratings: number
   status: string
-  profiles: OfferProfile
+  profiles: {
+    company_name: string
+  }
 }
 
 type OfferListProps = {
@@ -52,9 +50,7 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
 
       if (error) throw error
 
-      if (data) {
-        setOffers(data as unknown as Offer[])
-      }
+      setOffers(data as Offer[])
     } catch (error) {
       console.error('Error fetching offers:', error)
     } finally {

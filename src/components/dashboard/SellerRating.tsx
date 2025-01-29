@@ -1,4 +1,4 @@
-import { Star, TrendingUp } from "lucide-react"
+import { Star } from "lucide-react"
 
 type SellerRatingProps = {
   rating: number
@@ -27,18 +27,15 @@ export const SellerRating = ({ rating, numberOfRatings, totalSales }: SellerRati
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
         {renderStars(rating)}
-        <span className="text-sm text-gray-600">
-          ({numberOfRatings} {numberOfRatings === 1 ? 'ocena' : 'ocene'})
+        <span className="text-xs text-gray-600">
+          ({numberOfRatings})
         </span>
       </div>
-      <div className="flex items-center gap-2 text-sm text-gray-600">
-        <TrendingUp className="w-4 h-4 text-green-500" />
-        <span>
-          Ukupna vrednost prodaje: {totalSales.toLocaleString('sr-RS')} RSD
-        </span>
+      <div className="text-sm text-gray-600">
+        Ukupna vrednost prodaje: {totalSales.toLocaleString('sr-RS')} RSD
       </div>
     </div>
   )

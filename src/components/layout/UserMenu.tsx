@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2, Settings, BarChart3, LogOut } from "lucide-react";
 import { toast } from "sonner";
@@ -17,32 +17,6 @@ import { CompanyProfile } from "@/components/dashboard/CompanyProfile";
 export const UserMenu = () => {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchCompanyProfile();
-  }, []);
-
-  const fetchCompanyProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('company_name, logo_url')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (!error && data) {
-        setCompanyName(data.company_name);
-        setLogoUrl(data.logo_url);
-      }
-    } catch (error) {
-      console.error('Error fetching company profile:', error);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -62,9 +36,9 @@ export const UserMenu = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-accent">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={logoUrl || ""} alt={companyName} />
+              <AvatarImage src="/placeholder.svg" alt="Company Logo" />
               <AvatarFallback>
-                {companyName ? companyName.charAt(0) : <Building2 className="h-6 w-6" />}
+                <Building2 className="h-6 w-6" />
               </AvatarFallback>
             </Avatar>
           </Button>

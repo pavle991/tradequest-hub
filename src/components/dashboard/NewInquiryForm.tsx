@@ -56,7 +56,7 @@ export const NewInquiryForm = ({ onSubmit, type }: NewInquiryFormProps) => {
           type,
           tags,
           user_id: user.id,
-          status: 'active'  // Changed from 'aktivan' to 'active'
+          status: 'active'
         })
         .select()
         .single()

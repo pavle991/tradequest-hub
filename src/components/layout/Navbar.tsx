@@ -8,39 +8,18 @@ import { UserMenu } from "./UserMenu";
 
 export const Navbar = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [companyName, setCompanyName] = useState<string>("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchCompanyName(session.user.id);
-      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchCompanyName(session.user.id);
-      } else {
-        setCompanyName("");
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const fetchCompanyName = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('company_name')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (!error && data) {
-      setCompanyName(data.company_name);
-    }
-  };
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -53,9 +32,6 @@ export const Navbar = () => {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            {user && companyName && (
-              <span className="text-gray-700 font-medium">{companyName}</span>
-            )}
             {!user ? <AuthButtons /> : <UserMenu />}
           </div>
         </div>
