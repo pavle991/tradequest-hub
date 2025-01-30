@@ -65,7 +65,7 @@ const Dashboard = () => {
       status: "aktivan",
       type,
       tags,
-      user_id: "", // This will be set by the backend
+      user_id: "",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -73,7 +73,6 @@ const Dashboard = () => {
     setInquiries(prev => [newInquiry, ...prev])
   }
 
-  // Analytics data
   const analyticsData = {
     totalInquiries: inquiries.length,
     activeInquiries: inquiries.filter(i => i.status === "aktivan").length,
@@ -83,31 +82,43 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-white">
       <Navbar />
-      <div className="container mx-auto py-6 space-y-8 flex-grow">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="max-w-[1440px] mx-auto px-8 py-12">
+        <div className="flex justify-between items-center mb-12">
+          <h1 className="text-4xl font-semibold text-gray-900">Dashboard</h1>
           <CompanyProfileButton />
         </div>
         
-        <Tabs defaultValue="buying" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="buying">Nabavka</TabsTrigger>
-            <TabsTrigger value="selling">Prodaja</TabsTrigger>
+        <Tabs defaultValue="buying" className="w-full space-y-12">
+          <TabsList className="w-full max-w-md mx-auto bg-gray-100 p-1 rounded-xl">
+            <TabsTrigger 
+              value="buying" 
+              className="w-1/2 py-3 text-base font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg"
+            >
+              Nabavka
+            </TabsTrigger>
+            <TabsTrigger 
+              value="selling"
+              className="w-1/2 py-3 text-base font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg"
+            >
+              Prodaja
+            </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="buying" className="space-y-6">
+          <TabsContent value="buying" className="space-y-8 animate-fade-in">
             <NewInquiryForm onSubmit={handleSubmitInquiry} type="buying" />
             <InquiryList inquiries={inquiries} type="buying" />
           </TabsContent>
 
-          <TabsContent value="selling" className="space-y-6">
+          <TabsContent value="selling" className="space-y-8 animate-fade-in">
             <InquiryList inquiries={inquiries} type="selling" />
           </TabsContent>
         </Tabs>
 
-        <Analytics {...analyticsData} />
+        <div className="mt-16">
+          <Analytics {...analyticsData} />
+        </div>
       </div>
       <Footer />
     </div>
