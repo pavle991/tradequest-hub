@@ -3,21 +3,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { OfferCard } from "./offer/OfferCard"
 import { OfferListLoading } from "./offer/OfferListLoading"
 import { EmptyOfferList } from "./offer/EmptyOfferList"
-
-type Offer = {
-  id: string
-  seller_id: string
-  price: number
-  currency: string
-  description: string
-  seller_rating: number
-  total_sales: number
-  number_of_ratings: number
-  status: string
-  profiles: {
-    company_name: string
-  }
-}
+import { type Offer } from "./types"
 
 type OfferListProps = {
   inquiryId: string
@@ -50,7 +36,7 @@ export const OfferList = ({ inquiryId, inquiryTitle }: OfferListProps) => {
 
       if (error) throw error
 
-      setOffers(data as Offer[])
+      setOffers(data as unknown as Offer[])
     } catch (error) {
       console.error('Error fetching offers:', error)
     } finally {
