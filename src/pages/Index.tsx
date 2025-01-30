@@ -8,7 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
       <div className="flex-grow">
         <div className="overflow-hidden">
@@ -17,10 +17,10 @@ const Index = () => {
             <FeaturesSection />
           </div>
           <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
-            <RoadmapSection />
+            <StatsSection />
           </div>
           <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.6s", animationFillMode: "forwards" }}>
-            <StatsSection />
+            <RoadmapSection />
           </div>
           <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}>
             <CTASection />

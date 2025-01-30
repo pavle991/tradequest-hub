@@ -3,12 +3,12 @@ import FeatureCard from "./FeatureCard";
 
 const FeaturesSection = () => {
   return (
-    <section className="py-24 bg-gradient-to-b from-white via-blue-50 to-white">
+    <section className="py-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold text-center text-gray-900 mb-16 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+        <h2 className="text-4xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
           Zašto Izabrati Našu Platformu?
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           <div className="animate-fade-in opacity-0" style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}>
             <FeatureCard
               icon={<Shield className="h-12 w-12 text-blue-600" />}
@@ -32,6 +32,7 @@ const FeaturesSection = () => {
           </div>
         </div>
       </div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-50 via-white to-white"></div>
     </section>
   );
 };
