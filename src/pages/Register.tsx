@@ -1,9 +1,10 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -15,6 +16,13 @@ import { PreferencesForm } from "@/components/register/PreferencesForm";
 import { DescriptionForm } from "@/components/register/DescriptionForm";
 import { PasswordForm } from "@/components/register/PasswordForm";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const urlRegex = /^(https?:\/\/|www\.)[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+([\/\w-]*)*\/?$/;
 
@@ -89,13 +97,10 @@ const Register = () => {
       setIsLoading(true);
       console.log("Starting registration process...");
       
-      // Register user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
       });
-
-      console.log("Auth response:", { authData, authError });
 
       if (authError) {
         console.error("Auth error:", authError);
@@ -111,7 +116,6 @@ const Register = () => {
 
       console.log("User registered successfully, updating profile...");
 
-      // Update profile information
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -138,8 +142,6 @@ const Register = () => {
         })
         .eq('id', authData.user.id);
 
-      console.log("Profile update response:", { profileError });
-
       if (profileError) {
         console.error('Profile update error:', profileError);
         toast.error("Greška pri ažuriranju profila");
@@ -158,34 +160,35 @@ const Register = () => {
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Registracija</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <BasicInfoForm form={form} />
-              <AddressForm form={form} />
-              <ContactForm form={form} />
-              <SocialMediaForm form={form} />
-              <PreferencesForm form={form} />
-              <DescriptionForm 
-                form={form}
-                tags={tags}
-                setTags={setTags}
-                handleFileImport={() => {}}
-              />
-              <PasswordForm form={form} />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Registracija u toku..." : "Registruj se"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+    <Dialog open>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">Registracija</DialogTitle>
+          <DialogDescription>
+            Popunite formu ispod da biste kreirali svoj poslovni nalog.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <BasicInfoForm form={form} />
+            <AddressForm form={form} />
+            <ContactForm form={form} />
+            <SocialMediaForm form={form} />
+            <PreferencesForm form={form} />
+            <DescriptionForm 
+              form={form}
+              tags={tags}
+              setTags={setTags}
+              handleFileImport={() => {}}
+            />
+            <PasswordForm form={form} />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Registracija u toku..." : "Registruj se"}
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
