@@ -13,12 +13,12 @@ const HeroSection = () => {
     offset: ["start start", "end start"],
   });
 
-  // Dodatno usporavamo animaciju smanjivanjem krajnje vrednosti transformacije
-  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.4], [0.2, 0.8]);
-  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.4], [0.15, 0.8]);
-  const pathLengthThird = useTransform(scrollYProgress, [0, 0.4], [0.1, 0.8]);
-  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.4], [0.05, 0.8]);
-  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.4], [0, 0.8]);
+  // Usporavamo animaciju smanjivanjem opsega skrola, ali zadržavamo krajnju vrednost 1.2
+  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.8], [0.2, 1.2]);
+  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.8], [0.15, 1.2]);
+  const pathLengthThird = useTransform(scrollYProgress, [0, 0.8], [0.1, 1.2]);
+  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.8], [0.05, 1.2]);
+  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.8], [0, 1.2]);
 
   return (
     <section className="relative h-[200vh] bg-black w-full rounded-md overflow-clip" ref={ref}>
@@ -32,6 +32,7 @@ const HeroSection = () => {
         ]}
         title="Revolucija u B2B Nabavci i Prodaji"
         description="Objavi upit, uporedi ponude i izaberi najbolje uslove - sve na jednom mestu."
+        buttonText="B2B EZ"
       />
       <div className="sticky top-[60vh] text-center z-10">
         <div className="flex flex-col gap-4 mb-8">
