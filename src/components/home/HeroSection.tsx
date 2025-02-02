@@ -13,12 +13,12 @@ const HeroSection = () => {
     offset: ["start start", "end start"],
   });
 
-  // Smanjujemo brzinu animacije tako što menjamo opseg transformacije
-  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.4], [0.2, 1.2]);
-  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.4], [0.15, 1.2]);
-  const pathLengthThird = useTransform(scrollYProgress, [0, 0.4], [0.1, 1.2]);
-  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.4], [0.05, 1.2]);
-  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.4], [0, 1.2]);
+  // Dodatno usporavamo animaciju smanjivanjem krajnje vrednosti transformacije
+  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.4], [0.2, 0.8]);
+  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.4], [0.15, 0.8]);
+  const pathLengthThird = useTransform(scrollYProgress, [0, 0.4], [0.1, 0.8]);
+  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.4], [0.05, 0.8]);
+  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.4], [0, 0.8]);
 
   return (
     <section className="relative h-[200vh] bg-black w-full rounded-md overflow-clip" ref={ref}>
