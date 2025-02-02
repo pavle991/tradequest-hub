@@ -6,6 +6,8 @@ import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { SellerActions } from "./SellerActions"
 import { BuyerActions } from "./BuyerActions"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Plus } from "lucide-react"
 
 type InquiryCardProps = {
   inquiry: Inquiry
@@ -106,49 +108,58 @@ export const InquiryCard = ({
   }, [inquiry.id, type, offerId, lastCheckedAt])
 
   return (
-    <Card key={inquiry.id} className="p-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="text-xl font-semibold mb-2">{inquiry.title}</h4>
-          <p className="text-gray-600 mb-4">{inquiry.description}</p>
-          <div className="flex flex-wrap gap-2">
-            {inquiry.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value={inquiry.id} className="border bg-background px-4 py-1 rounded-lg">
+        <div className="flex justify-between items-start">
+          <AccordionTrigger className="flex flex-1 items-center gap-3 py-4 text-left">
+            <div>
+              <h4 className="text-xl font-semibold mb-2">{inquiry.title}</h4>
+              <p className="text-gray-600 mb-4">{inquiry.description}</p>
+              <div className="flex flex-wrap gap-2">
+                {inquiry.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <Plus
+              size={16}
+              strokeWidth={2}
+              className="shrink-0 opacity-60 transition-transform duration-200"
+              aria-hidden="true"
+            />
+          </AccordionTrigger>
+          <div className="pt-4">
+            {type === "selling" ? (
+              <SellerActions
+                inquiryId={inquiry.id}
+                inquiryTitle={inquiry.title}
+                hasExistingOffer={hasExistingOffer}
+                offerId={offerId}
+                unreadCount={unreadCount}
+                onOpenOfferForm={onOpenOfferForm}
+                onClearUnread={handleClearUnread}
+              />
+            ) : (
+              <BuyerActions
+                inquiryId={inquiry.id}
+                offersCount={offersCount}
+                unreadCount={unreadCount}
+                selectedInquiryId={selectedInquiryId}
+                onToggleOffers={onToggleOffers}
+                onClearUnread={handleClearUnread}
+              />
+            )}
           </div>
         </div>
-        {type === "selling" ? (
-          <SellerActions
-            inquiryId={inquiry.id}
-            inquiryTitle={inquiry.title}
-            hasExistingOffer={hasExistingOffer}
-            offerId={offerId}
-            unreadCount={unreadCount}
-            onOpenOfferForm={onOpenOfferForm}
-            onClearUnread={handleClearUnread}
-          />
-        ) : (
-          <BuyerActions
-            inquiryId={inquiry.id}
-            offersCount={offersCount}
-            unreadCount={unreadCount}
-            selectedInquiryId={selectedInquiryId}
-            onToggleOffers={onToggleOffers}
-            onClearUnread={handleClearUnread}
-          />
-        )}
-      </div>
-
-      {selectedInquiryId === inquiry.id && (
-        <div className="mt-4">
+        <AccordionContent className="pb-2">
           <OfferList
             inquiryId={inquiry.id}
             inquiryTitle={inquiry.title}
           />
-        </div>
-      )}
-    </Card>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   )
 }

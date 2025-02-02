@@ -42,10 +42,6 @@ export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesPro
     }
   }
 
-  const toggleOffers = (inquiryId: string) => {
-    setSelectedInquiryId(selectedInquiryId === inquiryId ? null : inquiryId)
-  }
-
   const handleOpenOfferForm = (inquiryId: string) => {
     setSelectedInquiryId(inquiryId)
     setShowOfferForm(true)
@@ -72,7 +68,7 @@ export const ActiveInquiries = ({ inquiries, type, loading }: ActiveInquiriesPro
           type={type}
           offersCount={offersCount[inquiry.id]}
           selectedInquiryId={selectedInquiryId}
-          onToggleOffers={toggleOffers}
+          onToggleOffers={setSelectedInquiryId}
           onOpenOfferForm={handleOpenOfferForm}
         />
       ))}
