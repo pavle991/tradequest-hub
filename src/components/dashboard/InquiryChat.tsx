@@ -28,7 +28,7 @@ export const InquiryChat = ({
 }: InquiryChatProps) => {
   const { 
     messages, 
-    newMessage, 
+    newMessage,
     selectedSeller,
     setNewMessage,
     setSelectedSeller,

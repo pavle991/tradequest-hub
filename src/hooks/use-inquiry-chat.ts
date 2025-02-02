@@ -5,6 +5,8 @@ import { Message } from "@/components/dashboard/types"
 export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
+  const [newMessage, setNewMessage] = useState("")
+  const [selectedSeller, setSelectedSeller] = useState<string | null>(null)
 
   useEffect(() => {
     fetchMessages()
@@ -21,7 +23,7 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
           created_at,
           status,
           sender_id,
-          profiles:sender_id (
+          profiles (
             company_name
           )
         `)
@@ -53,25 +55,33 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
     }
   }
 
-  const subscribeToMessages = () => {
-    const channel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `inquiry_id=eq.${inquiryId}${offerId ? ` AND offer_id=eq.${offerId}` : ''}`
-        },
-        () => {
-          fetchMessages()
-        }
-      )
-      .subscribe()
+  const handleMarkAsRead = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-    return () => {
-      supabase.removeChannel(channel)
+      const query = supabase
+        .from('messages')
+        .update({ status: 'read' })
+        .eq('inquiry_id', inquiryId)
+        .eq('status', 'delivered')
+        .neq('sender_id', user.id)
+
+      if (offerId) {
+        query.eq('offer_id', offerId)
+      }
+
+      await query
+    } catch (error) {
+      console.error('Error marking messages as read:', error)
+    }
+  }
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return
+    const success = await sendMessage(newMessage)
+    if (success) {
+      setNewMessage("")
     }
   }
 
@@ -104,9 +114,37 @@ export const useInquiryChat = (inquiryId: string, offerId?: string | null) => {
     }
   }
 
+  const subscribeToMessages = () => {
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `inquiry_id=eq.${inquiryId}${offerId ? ` AND offer_id=eq.${offerId}` : ''}`
+        },
+        () => {
+          fetchMessages()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }
+
   return {
     messages,
     loading,
+    newMessage,
+    selectedSeller,
+    setNewMessage,
+    setSelectedSeller,
+    handleSendMessage,
+    handleMarkAsRead,
     sendMessage
   }
 }
