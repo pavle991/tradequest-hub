@@ -13,14 +13,15 @@ const HeroSection = () => {
     offset: ["start start", "end start"],
   });
 
-  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.8], [0.2, 1.2]);
-  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.8], [0.15, 1.2]);
-  const pathLengthThird = useTransform(scrollYProgress, [0, 0.8], [0.1, 1.2]);
-  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.8], [0.05, 1.2]);
-  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.8], [0, 1.2]);
+  // Smanjujemo brzinu animacije tako što menjamo opseg transformacije
+  const pathLengthFirst = useTransform(scrollYProgress, [0, 0.4], [0.2, 1.2]);
+  const pathLengthSecond = useTransform(scrollYProgress, [0, 0.4], [0.15, 1.2]);
+  const pathLengthThird = useTransform(scrollYProgress, [0, 0.4], [0.1, 1.2]);
+  const pathLengthFourth = useTransform(scrollYProgress, [0, 0.4], [0.05, 1.2]);
+  const pathLengthFifth = useTransform(scrollYProgress, [0, 0.4], [0, 1.2]);
 
   return (
-    <section className="relative h-[400vh] bg-black w-full rounded-md overflow-clip" ref={ref}>
+    <section className="relative h-[200vh] bg-black w-full rounded-md overflow-clip" ref={ref}>
       <GoogleGeminiEffect
         pathLengths={[
           pathLengthFirst,
