@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/Footer"
 import { CompanyProfileButton } from "@/components/layout/CompanyProfileButton"
 import { type Inquiry } from "@/components/dashboard/types"
 import { supabase } from "@/integrations/supabase/client"
+import { Banner } from "@/components/ui/banner"
 
 const Dashboard = () => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
@@ -84,6 +85,12 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
+      <Banner
+        id="welcome"
+        message="🎉 Dobrodošli na novu verziju platforme! Istražite nove funkcionalnosti."
+        variant="rainbow"
+        height="2.5rem"
+      />
       <div className="max-w-[1440px] mx-auto px-8 py-12">
         <div className="flex justify-between items-center mb-12">
           <h1 className="text-4xl font-semibold text-gray-900">Dashboard</h1>

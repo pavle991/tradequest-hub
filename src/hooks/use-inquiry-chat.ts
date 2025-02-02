@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useInquiryChat(inquiryId: string) {
   const [messages, setMessages] = useState<any[]>([]);
@@ -8,7 +7,22 @@ export function useInquiryChat(inquiryId: string) {
 
   useEffect(() => {
     fetchMessages();
-    subscribeToMessages();
+    const channel = supabase
+      .channel(`inquiry_${inquiryId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `inquiry_id=eq.${inquiryId}`,
+      }, 
+      (payload) => {
+        setMessages(prev => [...prev, payload.new]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [inquiryId]);
 
   const fetchMessages = async () => {
@@ -17,87 +31,47 @@ export function useInquiryChat(inquiryId: string) {
         .from('messages')
         .select(`
           *,
-          sender:sender_id (
+          sender:sender_id(
             id,
-            email
-          ),
-          profile:sender_id (
-            company_name
+            email,
+            profile:profiles(company_name)
           )
         `)
         .eq('inquiry_id', inquiryId)
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching messages:', error);
-        toast.error('Greška pri učitavanju poruka');
-        return;
-      }
+      if (error) throw error;
 
-      if (data) {
-        const formattedMessages = data.map(message => ({
-          ...message,
-          sender_name: message.profile?.company_name || message.sender?.email?.split('@')[0] || 'Nepoznat korisnik'
-        }));
-        setMessages(formattedMessages);
-      }
+      const formattedMessages = data.map(message => ({
+        ...message,
+        sender_name: message.sender?.profile?.company_name || message.sender?.email
+      }));
+
+      setMessages(formattedMessages);
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Greška pri učitavanju poruka');
+      console.error('Error fetching messages:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const subscribeToMessages = () => {
-    const subscription = supabase
-      .channel('messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `inquiry_id=eq.${inquiryId}`
-        },
-        (payload) => {
-          const newMessage = payload.new;
-          setMessages(prev => [...prev, newMessage]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  };
-
   const sendMessage = async (content: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error('Niste prijavljeni');
-        return;
-      }
+      if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
         .from('messages')
-        .insert([
-          {
-            inquiry_id: inquiryId,
-            sender_id: user.id,
-            content
-          }
-        ]);
+        .insert({
+          inquiry_id: inquiryId,
+          sender_id: user.id,
+          content
+        });
 
-      if (error) {
-        console.error('Error sending message:', error);
-        toast.error('Greška pri slanju poruke');
-      }
+      if (error) throw error;
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Greška pri slanju poruke');
+      console.error('Error sending message:', error);
+      throw error;
     }
   };
 
