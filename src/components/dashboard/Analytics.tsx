@@ -9,6 +9,7 @@ import {
   ResponsiveContainer
 } from "recharts"
 import { MoveDownLeft, MoveUpRight } from "lucide-react";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 type AnalyticsProps = {
   totalInquiries: number
@@ -31,6 +32,17 @@ const locationData = [
   { city: "Niš", orders: 180 },
   { city: "Kragujevac", orders: 150 }
 ]
+
+const chartConfig = {
+  price: {
+    label: "Cena",
+    color: "#4f46e5"
+  },
+  orders: {
+    label: "Porudžbine",
+    color: "#10b981"
+  }
+}
 
 export const Analytics = ({
   totalInquiries,
@@ -97,30 +109,30 @@ export const Analytics = ({
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Prosečne cene po kategorijama</h2>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer config={chartConfig} className="w-full h-full">
               <BarChart data={priceData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
-                <Bar dataKey="price" fill="#4f46e5" />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="price" fill="var(--color-price)" radius={4} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </Card>
 
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Geografska distribucija porudžbina</h2>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer config={chartConfig} className="w-full h-full">
               <BarChart data={locationData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="city" />
                 <YAxis />
-                <Tooltip />
-                <Bar dataKey="orders" fill="#10b981" />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="orders" fill="var(--color-orders)" radius={4} />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </Card>
 
