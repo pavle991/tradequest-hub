@@ -83,7 +83,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <Banner
         id="welcome"
@@ -91,39 +91,39 @@ const Dashboard = () => {
         variant="rainbow"
         height="2.5rem"
       />
-      <div className="max-w-[1440px] mx-auto px-8 py-12">
-        <div className="flex justify-between items-center mb-12">
-          <h1 className="text-4xl font-semibold text-gray-900">Dashboard</h1>
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-semibold text-foreground">Dashboard</h1>
           <CompanyProfileButton />
         </div>
         
-        <Tabs defaultValue="buying" className="w-full space-y-12">
-          <TabsList className="w-full max-w-md mx-auto bg-gray-100 p-1 rounded-xl">
+        <Tabs defaultValue="buying" className="w-full space-y-8">
+          <TabsList className="w-full max-w-md mx-auto bg-muted p-1 rounded-xl">
             <TabsTrigger 
               value="buying" 
-              className="w-1/2 py-3 text-base font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg"
+              className="w-1/2 py-2 text-base font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg"
             >
               Nabavka
             </TabsTrigger>
             <TabsTrigger 
               value="selling"
-              className="w-1/2 py-3 text-base font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg"
+              className="w-1/2 py-2 text-base font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg"
             >
               Prodaja
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="buying" className="space-y-8 animate-fade-in">
+          <TabsContent value="buying" className="space-y-6 animate-fade-in">
             <NewInquiryForm onSubmit={handleSubmitInquiry} type="buying" />
             <InquiryList inquiries={inquiries} type="buying" />
           </TabsContent>
 
-          <TabsContent value="selling" className="space-y-8 animate-fade-in">
+          <TabsContent value="selling" className="space-y-6 animate-fade-in">
             <InquiryList inquiries={inquiries} type="selling" />
           </TabsContent>
         </Tabs>
 
-        <div className="mt-16">
+        <div className="mt-12">
           <Analytics {...analyticsData} />
         </div>
       </div>
