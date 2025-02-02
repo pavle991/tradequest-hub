@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts"
+import { MoveDownLeft, MoveUpRight } from "lucide-react";
 
 type AnalyticsProps = {
   totalInquiries: number
@@ -40,31 +41,57 @@ export const Analytics = ({
 }: AnalyticsProps) => {
   return (
     <div className="space-y-8">
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Analitika</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-700">Ukupno upita</h3>
-            <p className="text-2xl font-bold text-blue-900">{totalInquiries}</p>
-          </div>
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-700">Aktivni upiti</h3>
-            <p className="text-2xl font-bold text-green-900">{activeInquiries}</p>
-          </div>
-          <div className="p-4 bg-purple-50 rounded-lg">
-            <h3 className="font-semibold text-purple-700">Završeni upiti</h3>
-            <p className="text-2xl font-bold text-purple-900">{completedInquiries}</p>
-          </div>
-          <div className="p-4 bg-yellow-50 rounded-lg">
-            <h3 className="font-semibold text-yellow-700">Prosečno vreme odgovora</h3>
-            <p className="text-2xl font-bold text-yellow-900">{averageResponseTime}</p>
-          </div>
-          <div className="p-4 bg-indigo-50 rounded-lg">
-            <h3 className="font-semibold text-indigo-700">Stopa uspešnosti</h3>
-            <p className="text-2xl font-bold text-indigo-900">{successRate}%</p>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="flex gap-0 flex-col justify-between p-6 border rounded-md">
+          <MoveUpRight className="w-4 h-4 mb-10 text-primary" />
+          <h2 className="text-4xl tracking-tighter max-w-xl text-left font-regular flex flex-row gap-4 items-end">
+            {totalInquiries}
+          </h2>
+          <p className="text-base leading-relaxed tracking-tight text-muted-foreground max-w-xl text-left">
+            Ukupno upita
+          </p>
         </div>
-      </Card>
+        
+        <div className="flex gap-0 flex-col justify-between p-6 border rounded-md">
+          <MoveUpRight className="w-4 h-4 mb-10 text-success" />
+          <h2 className="text-4xl tracking-tighter max-w-xl text-left font-regular flex flex-row gap-4 items-end">
+            {activeInquiries}
+          </h2>
+          <p className="text-base leading-relaxed tracking-tight text-muted-foreground max-w-xl text-left">
+            Aktivni upiti
+          </p>
+        </div>
+
+        <div className="flex gap-0 flex-col justify-between p-6 border rounded-md">
+          <MoveUpRight className="w-4 h-4 mb-10 text-primary" />
+          <h2 className="text-4xl tracking-tighter max-w-xl text-left font-regular flex flex-row gap-4 items-end">
+            {completedInquiries}
+          </h2>
+          <p className="text-base leading-relaxed tracking-tight text-muted-foreground max-w-xl text-left">
+            Završeni upiti
+          </p>
+        </div>
+
+        <div className="flex gap-0 flex-col justify-between p-6 border rounded-md">
+          <MoveDownLeft className="w-4 h-4 mb-10 text-destructive" />
+          <h2 className="text-4xl tracking-tighter max-w-xl text-left font-regular flex flex-row gap-4 items-end">
+            {averageResponseTime}
+          </h2>
+          <p className="text-base leading-relaxed tracking-tight text-muted-foreground max-w-xl text-left">
+            Prosečno vreme odgovora
+          </p>
+        </div>
+
+        <div className="flex gap-0 flex-col justify-between p-6 border rounded-md">
+          <MoveUpRight className="w-4 h-4 mb-10 text-success" />
+          <h2 className="text-4xl tracking-tighter max-w-xl text-left font-regular flex flex-row gap-4 items-end">
+            {successRate}%
+          </h2>
+          <p className="text-base leading-relaxed tracking-tight text-muted-foreground max-w-xl text-left">
+            Stopa uspešnosti
+          </p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="p-6">
@@ -112,5 +139,5 @@ export const Analytics = ({
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};
